@@ -1,16 +1,19 @@
 import { atom, selector } from 'recoil';
 
-// Atom to store the authentication state
+// Get stored values from localStorage
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user'));
+
 export const authAtom = atom({
-  key: 'authAtom', // Unique ID for the atom
+  key: 'authAtom',
   default: {
-    token: null,  // Stores JWT token
-    user: null,   // Stores user details (name, email, role, etc.)
-    isAuthenticated: false,  // Tracks if the user is authenticated
+    token: token || null,
+    user: user || null,
+    isAuthenticated: !!token,
   },
 });
 
-// Selector to extract token from the state
+// Selector to extract token
 export const tokenSelector = selector({
   key: 'tokenSelector',
   get: ({ get }) => {

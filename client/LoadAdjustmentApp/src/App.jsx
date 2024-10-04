@@ -1,38 +1,39 @@
-import { useState } from 'react'
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-} from "react-router-dom";
+import React, { useEffect } from 'react';
+import { RecoilRoot, useSetRecoilState } from 'recoil';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { authAtom } from './store/authStore/authAtom';
+import AppRoutes from './routes/AppRoutes';
 
-import Signup from './pages/Signup';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import { RecoilRoot } from 'recoil';
-import ProtectedRoute from "./middlewares/ProtectedRoute"
-
-function App() {
+const App = () => {
   return (
-    <>
     <RecoilRoot>
-    <BrowserRouter>
-        <Routes>
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/signin" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-      </BrowserRouter>
-      </RecoilRoot>
-    </>
-  )
-}
+      <Router>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </Router>
+    </RecoilRoot>
+  );
+};
 
-export default App
+// Helper component to initialize Recoil state from localStorage
+const AuthProvider = ({ children }) => {
+  const setAuthState = useSetRecoilState(authAtom);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (token && user) {
+      setAuthState({
+        token,
+        user,
+        isAuthenticated: true,
+      });
+    }
+  }, [setAuthState]);
+
+  return children;
+};
+
+export default App;

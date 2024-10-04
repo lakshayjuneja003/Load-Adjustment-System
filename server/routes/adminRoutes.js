@@ -1,18 +1,15 @@
 import { Router } from "express";
-import { changeCurrentPassword, getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, updateAccountDetails } from "../contollers/adminControllers.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, verifyAdmin } from "../middlewares/auth.middleware.js";
+import { AddSubjects, adminDashboard, adminLogin, adminRegister, DeleteSubject, GetSubjects, UpdateSubject } from "../contollers/adminController.js";
 
-const router = Router()
+const router = Router();
 
-router.route("/register").post(registerUser)
+router.post("/register", adminRegister);
+router.post("/login", adminLogin);
+router.get("/dashboard", verifyJWT, verifyAdmin, adminDashboard);
+router.post("/add-subjects" ,verifyJWT, verifyAdmin , AddSubjects)
+router.get("/subjects" ,verifyJWT, verifyAdmin , GetSubjects);
+router.put("/subject/update/:id" , UpdateSubject);
+router.delete("/subject/delete/:id" , DeleteSubject);
 
-router.route("/login").post(loginUser)
-
-//secured routes
-router.route("/logout").post(verifyJWT,  logoutUser)
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").post(verifyJWT, changeCurrentPassword)
-router.route("/current-user").get(verifyJWT, getCurrentUser)
-router.route("/update-account").patch(verifyJWT, updateAccountDetails)
- 
-export default router
+export default router;

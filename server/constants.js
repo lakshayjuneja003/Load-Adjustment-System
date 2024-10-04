@@ -1,1 +1,1 @@
-export const DB_NAME = "LoadAdjustmentSystem";
+export const DB_NAME = "loadapp";

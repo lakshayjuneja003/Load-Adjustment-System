@@ -1,29 +1,48 @@
-import jwt from 'jsonwebtoken';
-import { Admin } from '../schemas/adminSchema.js';
+import jwt from "jsonwebtoken";
+import { User } from "../schemas/userSchema.js";
 
+// Middleware to verify JWT token
 export const verifyJWT = async (req, res, next) => {
-    try {
-        // Extract the token from the Authorization header
-        const token = req.header("Authorization")?.replace("Bearer ", "");
-        if (!token) {
-            return res.status(403).json(
-                { message: "Unauthorized Access - No Token Provided" 
-                }
-            );
-        }
+  try {
+    // Get the token from cookies or the Authorization header
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
 
-        // Verify the token and get user data
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        
-        // Find the user by ID and exclude sensitive fields
-        const user = await Admin.findById(decodedToken?._id).select("-password -refreshToken");
-        if (!user) {
-            return res.status(403).json({ message: "Invalid Token Access" });
-        }
-
-        req.user = user;
-        next();
-    } catch (error) {
-        return res.status(401).json({ message: error?.message || "Invalid Access Token" });
+    // Check if the token is present
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
+
+    // Verify the token with the access secret key
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    // Check if the user exists in the database
+    const user = await User.findById(decodedToken._id).select("-password -refreshToken");
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized: User not found" });
+    }
+
+    // Attach user details to the request object for further middleware/routes
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("JWT Verification Error:", error);
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+// Middleware to verify if the user has an Admin role
+export const verifyAdmin = (req, res, next) => {
+  if (req.user.role !== "Admin") {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
+  }
+  next();
+};
+
+// Middleware to verify if the user has a Staff role
+export const verifyStaff = (req, res, next) => {
+  if (req.user.role !== "Staff") {
+    return res.status(403).json({ message: "Forbidden: Staff members only" });
+  }
+  next();
 };

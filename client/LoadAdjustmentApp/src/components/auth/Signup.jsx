@@ -2,41 +2,46 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Signup = () => {
+const Signup = ({ role }) => {
   const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [error, setError] = useState(''); // State for error messages
   const navigate = useNavigate();
 
   // Handle Signup
-  const handleLogin = async () => {
-    console.log(fullname, username, email, password);
-
+  const handleSignup = async () => {
     try {
-      const response = await axios.post('http://localhost:3004/api/v1/admin/register', {
+      const endpoint = role === 'admin' 
+        ? 'http://localhost:3004/api/v1/admin/register'
+        : 'http://localhost:3004/api/v1/user/register';
+
+      const response = await axios.post(endpoint, {
         fullname,
         username,
         email,
         password,
       });
-
       console.log(response);
+      
 
       if (response.status === 201) {
-        navigate('/signin');
+        navigate(`${role}/login`);
       } else {
-        console.log(response.data.message);
+        setError(response.data.message || 'Signup failed. Please try again.');
       }
     } catch (error) {
-      console.error('Signin Error:', error);
+      console.error('Signup Error:', error);
+      setError('Signup failed. Please try again.');
     }
   };
 
   return (
     <div style={styles.wrapper}>
       <div style={styles.loginContainer}>
-        <h2 style={styles.heading}>Admin Signup</h2>
+        <h2 style={styles.heading}>{role.charAt(0).toUpperCase() + role.slice(1)} Signup</h2>
+        {error && <p style={styles.errorText}>{error}</p>}
         <input
           type="text"
           placeholder="Fullname"
@@ -65,13 +70,13 @@ const Signup = () => {
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
         />
-        <button onClick={handleLogin} style={styles.button}>
+        <button onClick={handleSignup} style={styles.button}>
           Signup
         </button>
 
         <p style={styles.footerText}>
-          Have an account? <a href="/signin" style={styles.link}>Signin</a> 
-          </p>
+          Have an account? <a href={`/${role}/login`} style={styles.link}>Signin</a> 
+        </p>
       </div>
     </div>
   );
@@ -85,7 +90,7 @@ const styles = {
     alignItems: 'center',
     height: '100vh',
     backgroundColor: '#f0f4f8',
-    fontFamily: 'Arial, sans-serif'
+    fontFamily: 'Arial, sans-serif',
   },
   loginContainer: {
     width: '400px',
@@ -109,8 +114,10 @@ const styles = {
     boxSizing: 'border-box',
     transition: 'border-color 0.3s',
   },
-  inputFocus: {
-    borderColor: '#007bff',
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: '10px',
   },
   button: {
     width: '100%',
@@ -123,9 +130,6 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'background-color 0.3s',
-  },
-  buttonHover: {
-    backgroundColor: '#0056b3',
   },
   link: {
     color: '#007BFF',

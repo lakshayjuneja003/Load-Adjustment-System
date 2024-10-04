@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { authAtom } from '../store/authStore/authAtom.js';
+import { authAtom } from '../../store/authStore/authAtom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Login = () => {
+const Login = ({ role }) => {
   const [auth, setAuth] = useRecoilState(authAtom);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,32 +12,35 @@ const Login = () => {
 
   // Handle Login
   const handleLogin = async () => {
-    console.log(email, password);
-
     try {
-      const response = await axios.post('http://localhost:3004/api/v1/admin/login', {
+      const endpoint = role === 'admin' 
+        ? 'http://localhost:3004/api/v1/admin/login'
+        : 'http://localhost:3004/api/v1/user/login';
+      const response = await axios.post(endpoint, {
         email,
         password,
       });
       console.log(response);
+      
+      if (response.status === 200 && response.data?.token) {
+        const { token, user } = response.data;
 
-      if (response.status == 200) {
-      //  Store the token and user info in Recoil state
-          if(response.data?.token){
-            setAuth({
-              token: response.data.token,
-              user: response.data.user,  // User details from the response
-              isAuthenticated: true,
+        setAuth({
+          token,
+          user,
+          isAuthenticated: true,
         });
-        // Save the token in cookies/localStorage for persistent login
-        document.cookie = `token=${response.data.accessToken}; path=/; Secure; SameSite=Strict;`;
 
-        // Redirect to dashboard
-          navigate('/dashboard');
-      }
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        document.cookie = `token=${token}; path=/; Secure; SameSite=Strict;`;
+
+        // Redirect to the corresponding dashboard
+        navigate(`/${role}/dashboard`);
       } else {
-          alert('Invalid login credentials');
-       }
+        alert('Invalid login credentials');
+      }
     } catch (error) {
       console.error('Login Error:', error);
       alert('Login failed. Please try again.');
@@ -47,7 +50,7 @@ const Login = () => {
   return (
     <div style={styles.wrapper}>
       <div style={styles.loginContainer}>
-        <h2 style={styles.heading}>Admin Login</h2>
+        <h2 style={styles.heading}>{role.charAt(0).toUpperCase() + role.slice(1)} Login</h2>
         <input
           type="email"
           placeholder="Email"
@@ -64,14 +67,14 @@ const Login = () => {
         />
         <button onClick={handleLogin} style={styles.button}>Login</button>
         <p style={styles.footerText}>
-          Don't have an account? <a href="/signup" style={styles.link}>Signup</a>
+          Don't have an account? <a href={`/${role}/signup`} style={styles.link}>Signup</a>
         </p>
       </div>
     </div>
   );
 };
 
-// Styles Object
+// ... Styles object remains unchanged ...
 const styles = {
   wrapper: {
     display: 'flex',
@@ -96,25 +99,25 @@ const styles = {
   },
   input: {
     width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    borderRadius: '5px',
+    padding: '12px',
+    margin: '15px 0',
+    borderRadius: '8px',
     border: '1px solid #ccc',
     fontSize: '16px',
+    boxSizing: 'border-box',
+    transition: 'border-color 0.3s',
   },
   button: {
     width: '100%',
-    padding: '10px',
+    padding: '12px',
     backgroundColor: '#007BFF',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '8px',
     fontSize: '16px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
-  buttonHover: {
-    backgroundColor: '#0056b3',
+    marginTop: '15px',
+    transition: 'background-color 0.3s, transform 0.2s',
   },
   footerText: {
     textAlign: 'center',
@@ -123,6 +126,7 @@ const styles = {
   link: {
     color: '#007BFF',
     textDecoration: 'none',
+    fontWeight: 'bold',
   },
 };
 
