@@ -126,8 +126,10 @@ export const GetSubjects = async (req, res) => {
 
 export const UpdateSubject = async (req, res) => {
   try {
+    console.log(req.params.id , req.user.id);
+    
     const subject = await Subject.findOneAndUpdate(
-      { _id: req.params.id, adminId: req.adminId }, // Ensure the admin can only update their subjects
+      { _id: req.params.id, adminId: req.user.id }, // Ensure the admin can only update their subjects
       req.body,
       { new: true, runValidators: true }
     );
@@ -145,7 +147,7 @@ export const UpdateSubject = async (req, res) => {
 export const DeleteSubject = async (req, res) => {
   try {
     const subject = await Subject.findOneAndDelete(
-      { _id: req.params.id, adminId: req.adminId } // Ensure the admin can only delete their subjects
+      { _id: req.params.id, adminId: req.user.id } // Ensure the admin can only delete their subjects
     );
 
     if (!subject) {

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const AddSubjects = () => {
   const navigate = useNavigate();
   const [years, setYears] = useState('');
+  const [semesters, setSemesters] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [subjectData, setSubjectData] = useState({
     year: '',
@@ -15,9 +16,28 @@ const AddSubjects = () => {
     numberOfClasses: '',
     numberOfTutorials: '',
     labHours: '',
-    creditPoints: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [creditPoints, setCreditPoints] = useState(0);
+
+  // Automatically generate semesters based on the number of years entered
+  useEffect(() => {
+    const newSemesters = Array.from({ length: years * 2 }, (_, i) => i + 1);
+    setSemesters(newSemesters);
+  }, [years]);
+
+  // Calculate credit points dynamically based on subject type and input values
+  useEffect(() => {
+    let calculatedCreditPoints = 0;
+
+    if (subjectData.subjectType === 'Theory') {
+      calculatedCreditPoints = parseInt(subjectData.numberOfClasses || 0) + parseInt(subjectData.numberOfTutorials || 0);
+    } else if (subjectData.subjectType === 'Lab') {
+      calculatedCreditPoints = parseInt(subjectData.labHours || 0);
+    }
+
+    setCreditPoints(calculatedCreditPoints);
+  }, [subjectData.numberOfClasses, subjectData.numberOfTutorials, subjectData.labHours, subjectData.subjectType]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +51,7 @@ const AddSubjects = () => {
       subjectName: subjectData.subjectName,
       subjectCode: subjectData.subjectCode,
       subjectType: subjectData.subjectType,
-      creditPoints: subjectData.creditPoints,
+      creditPoints,
     };
 
     if (subjectData.subjectType === 'Theory') {
@@ -52,7 +72,6 @@ const AddSubjects = () => {
       numberOfClasses: '',
       numberOfTutorials: '',
       labHours: '',
-      creditPoints: '',
     });
     setIsModalOpen(false);
   };
@@ -114,7 +133,7 @@ const AddSubjects = () => {
             subjects.map((subject, index) => (
               <div key={index} style={styles.subjectItem}>
                 <span style={styles.subjectText}>
-                  {`Year: ${subject.year}, Semester: ${subject.semester}, Name: ${subject.subjectName}, Code: ${subject.subjectCode}`}
+                  {`Year: ${subject.year}, Semester: ${subject.semester}, Name: ${subject.subjectName}, Code: ${subject.subjectCode}, Credit Points: ${subject.creditPoints}`}
                 </span>
               </div>
             ))
@@ -124,12 +143,14 @@ const AddSubjects = () => {
         <button type="button" onClick={() => setIsModalOpen(true)} style={styles.addButton}>
           + Add Subject
         </button>
-        <button type="submit" style={styles.submitButton}>
-          Submit All Subjects
-        </button>
-        <button type="button" style={styles.cancelButton} onClick={handleCancel}>
-          Cancel
-        </button>
+        <div style={styles.buttonGroup}>
+          <button type="submit" style={styles.submitButton}>
+            Submit All Subjects
+          </button>
+          <button type="button" style={styles.cancelButton} onClick={handleCancel}>
+            Cancel
+          </button>
+        </div>
       </form>
 
       {isModalOpen && (
@@ -146,15 +167,20 @@ const AddSubjects = () => {
                 required
                 style={styles.modalInput}
               />
-              <input
-                type="number"
+              <select
                 name="semester"
-                placeholder="Semester"
                 value={subjectData.semester}
                 onChange={handleInputChange}
                 required
                 style={styles.modalInput}
-              />
+              >
+                <option value="">Select Semester</option>
+                {semesters.map((semester, index) => (
+                  <option key={index} value={semester}>
+                    {semester}
+                  </option>
+                ))}
+              </select>
               <input
                 type="text"
                 name="subjectName"
@@ -217,15 +243,7 @@ const AddSubjects = () => {
                   style={styles.modalInput}
                 />
               )}
-              <input
-                type="number"
-                name="creditPoints"
-                placeholder="Credit Points"
-                value={subjectData.creditPoints}
-                onChange={handleInputChange}
-                required
-                style={styles.modalInput}
-              />
+              <p style={styles.creditDisplay}>Calculated Credit Points: {creditPoints}</p>
             </div>
             <div style={styles.modalButtonGroup}>
               <button type="button" onClick={handleAddSubject} style={styles.modalAddButton}>
@@ -244,20 +262,24 @@ const AddSubjects = () => {
 
 const styles = {
   container: {
-    padding: '20px',
+    padding: '30px',
     borderRadius: '10px',
-    maxWidth: '700px',
-    margin: 'auto',
-    backgroundColor: '#f0f4f7',
-    boxShadow: '0 2px 15px rgba(0, 0, 0, 0.1)',
+    maxWidth: '800px',
+    margin: '50px auto',
+    backgroundColor: '#fafafa',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
   heading: {
     textAlign: 'center',
-    color: '#333',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#34495e',
+    marginBottom: '30px',
   },
   subHeading: {
-    color: '#007bff',
-    marginBottom: '10px',
+    fontSize: '18px',
+    color: '#2980b9',
+    marginBottom: '15px',
   },
   form: {
     display: 'flex',
@@ -271,59 +293,71 @@ const styles = {
   },
   label: {
     marginRight: '10px',
+    fontWeight: '500',
+    color: '#34495e',
   },
   input: {
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-    flex: 1,
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+    width: '100%',
   },
   subjectList: {
-    borderRadius: '5px',
-    padding: '10px',
-    border: '1px solid #ddd',
-    backgroundColor: '#fff',
+    backgroundColor: '#ecf0f1',
+    borderRadius: '10px',
+    padding: '15px',
   },
   emptyMessage: {
-    color: '#999',
+    color: '#7f8c8d',
+    textAlign: 'center',
   },
   subjectItem: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#3498db',
     borderRadius: '5px',
-    padding: '10px',
+    padding: '12px',
     marginBottom: '10px',
   },
   subjectText: {
-    color: '#333',
+    color: '#fff',
   },
   addButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#27ae60',
     color: '#fff',
-    padding: '10px',
-    borderRadius: '5px',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
     cursor: 'pointer',
+    fontSize: '16px',
+  },
+  buttonGroup: {
+    display: 'flex',
+    justifyContent: 'space-between',
   },
   submitButton: {
-    backgroundColor: '#007bff',
-    color: '#fff',
-    padding: '10px',
-    borderRadius: '5px',
+    backgroundColor: '#2ecc71',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
     cursor: 'pointer',
+    color: '#fff',
+    fontWeight: '600',
   },
   cancelButton: {
-    backgroundColor: '#dc3545',
-    color: '#fff',
-    padding: '10px',
-    borderRadius: '5px',
+    backgroundColor: '#e74c3c',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
     cursor: 'pointer',
+    color: '#fff',
+    fontWeight: '600',
   },
   modalOverlay: {
     position: 'fixed',
-    top: 0,
-    left: 0,
+    top: '0',
+    left: '0',
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -332,22 +366,25 @@ const styles = {
     backgroundColor: '#fff',
     borderRadius: '10px',
     padding: '20px',
-    width: '400px',
-    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',
+    width: '500px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   },
   modalHeading: {
     textAlign: 'center',
+    fontSize: '22px',
+    fontWeight: '600',
+    color: '#34495e',
     marginBottom: '20px',
   },
   modalForm: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '15px',
   },
   modalInput: {
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
   },
   modalButtonGroup: {
     display: 'flex',
@@ -355,17 +392,19 @@ const styles = {
     marginTop: '20px',
   },
   modalAddButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#2980b9',
     color: '#fff',
-    padding: '10px',
-    borderRadius: '5px',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
     cursor: 'pointer',
   },
   modalCancelButton: {
-    backgroundColor: '#dc3545',
+    backgroundColor: '#c0392b',
     color: '#fff',
-    padding: '10px',
-    borderRadius: '5px',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
     cursor: 'pointer',
   },
 };

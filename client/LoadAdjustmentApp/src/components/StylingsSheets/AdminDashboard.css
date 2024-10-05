@@ -1,0 +1,56 @@
+.admin-container {
+  padding: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.blue-line {
+  border: none;
+  height: 4px;
+  background-color: #007bff;
+  margin: 10px 0;
+}
+
+.filter-box {
+  margin-bottom: 20px;
+}
+
+.filter-box label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.filter-box select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 150px;
+}

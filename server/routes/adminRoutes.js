@@ -9,7 +9,7 @@ router.post("/login", adminLogin);
 router.get("/dashboard", verifyJWT, verifyAdmin, adminDashboard);
 router.post("/add-subjects" ,verifyJWT, verifyAdmin , AddSubjects)
 router.get("/subjects" ,verifyJWT, verifyAdmin , GetSubjects);
-router.put("/subject/update/:id" , UpdateSubject);
-router.delete("/subject/delete/:id" , DeleteSubject);
+router.put("/subject/update/:id" ,verifyJWT, verifyAdmin , UpdateSubject);
+router.delete("/subject/delete/:id" ,verifyJWT , verifyAdmin ,  DeleteSubject);
 
 export default router;
