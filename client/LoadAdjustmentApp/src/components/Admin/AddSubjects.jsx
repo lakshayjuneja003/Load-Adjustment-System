@@ -22,8 +22,10 @@ const AddSubjects = () => {
 
   // Automatically generate semesters based on the number of years entered
   useEffect(() => {
-    const newSemesters = Array.from({ length: years * 2 }, (_, i) => i + 1);
-    setSemesters(newSemesters);
+    if (years) {
+      const newSemesters = Array.from({ length: years * 2 }, (_, i) => i + 1);
+      setSemesters(newSemesters);
+    }
   }, [years]);
 
   // Calculate credit points dynamically based on subject type and input values
@@ -158,6 +160,7 @@ const AddSubjects = () => {
           <div style={styles.modalContent}>
             <h2 style={styles.modalHeading}>Add Subject</h2>
             <div style={styles.modalForm}>
+              <label>Year</label>
               <input
                 type="number"
                 name="year"
@@ -167,6 +170,8 @@ const AddSubjects = () => {
                 required
                 style={styles.modalInput}
               />
+
+              <label>Semester</label>
               <select
                 name="semester"
                 value={subjectData.semester}
@@ -181,6 +186,8 @@ const AddSubjects = () => {
                   </option>
                 ))}
               </select>
+
+              <label>Subject Name</label>
               <input
                 type="text"
                 name="subjectName"
@@ -190,6 +197,8 @@ const AddSubjects = () => {
                 required
                 style={styles.modalInput}
               />
+
+              <label>Subject Code</label>
               <input
                 type="text"
                 name="subjectCode"
@@ -199,6 +208,8 @@ const AddSubjects = () => {
                 required
                 style={styles.modalInput}
               />
+
+              <label>Subject Type</label>
               <select
                 name="subjectType"
                 value={subjectData.subjectType}
@@ -210,8 +221,10 @@ const AddSubjects = () => {
                 <option value="Theory">Theory</option>
                 <option value="Lab">Lab</option>
               </select>
+
               {subjectData.subjectType === 'Theory' && (
                 <>
+                  <label>Classes per Week</label>
                   <input
                     type="number"
                     name="numberOfClasses"
@@ -221,6 +234,8 @@ const AddSubjects = () => {
                     required
                     style={styles.modalInput}
                   />
+
+                  <label>Number of Tutorials</label>
                   <input
                     type="number"
                     name="numberOfTutorials"
@@ -232,19 +247,25 @@ const AddSubjects = () => {
                   />
                 </>
               )}
+
               {subjectData.subjectType === 'Lab' && (
-                <input
-                  type="number"
-                  name="labHours"
-                  placeholder="Lab Hours per Week"
-                  value={subjectData.labHours}
-                  onChange={handleInputChange}
-                  required
-                  style={styles.modalInput}
-                />
+                <>
+                  <label>Lab Hours per Week</label>
+                  <input
+                    type="number"
+                    name="labHours"
+                    placeholder="Lab Hours per Week"
+                    value={subjectData.labHours}
+                    onChange={handleInputChange}
+                    required
+                    style={styles.modalInput}
+                  />
+                </>
               )}
+
               <p style={styles.creditDisplay}>Calculated Credit Points: {creditPoints}</p>
             </div>
+
             <div style={styles.modalButtonGroup}>
               <button type="button" onClick={handleAddSubject} style={styles.modalAddButton}>
                 Add Subject
@@ -259,27 +280,23 @@ const AddSubjects = () => {
     </div>
   );
 };
-
 const styles = {
   container: {
-    padding: '30px',
-    borderRadius: '10px',
-    maxWidth: '800px',
-    margin: '50px auto',
-    backgroundColor: '#fafafa',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    padding: '20px',
+    maxWidth: '900px',
+    margin: '0 auto',
+    fontFamily: "'Roboto', sans-serif",
+    backgroundColor: '#121212',
+    color: '#E0E0E0',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   heading: {
     textAlign: 'center',
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 'bold',
-    color: '#34495e',
-    marginBottom: '30px',
-  },
-  subHeading: {
-    fontSize: '18px',
-    color: '#2980b9',
-    marginBottom: '15px',
+    marginBottom: '20px',
+    color: '#00ADB5',
   },
   form: {
     display: 'flex',
@@ -288,103 +305,121 @@ const styles = {
   },
   inputGroup: {
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  label: {
-    marginRight: '10px',
-    fontWeight: '500',
-    color: '#34495e',
-  },
-  input: {
-    padding: '12px',
-    borderRadius: '8px',
-    border: '1px solid #ddd',
-    width: '100%',
-  },
-  subjectList: {
-    backgroundColor: '#ecf0f1',
-    borderRadius: '10px',
-    padding: '15px',
-  },
-  emptyMessage: {
-    color: '#7f8c8d',
-    textAlign: 'center',
-  },
-  subjectItem: {
-    backgroundColor: '#3498db',
-    borderRadius: '5px',
-    padding: '12px',
+    flexDirection: 'column',
     marginBottom: '10px',
   },
+  label: {
+    fontSize: '16px',
+    marginBottom: '5px',
+    color: '#EEEEEE',
+  },
+  input: {
+    padding: '10px',
+    borderRadius: '4px',
+    border: '1px solid #00ADB5',
+    backgroundColor: '#1E1E1E',
+    color: '#FFFFFF',
+    outline: 'none',
+  },
+  subjectList: {
+    padding: '20px',
+    backgroundColor: '#1E1E1E',
+    borderRadius: '8px',
+    border: '1px solid #00ADB5',
+  },
+  subHeading: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    marginBottom: '10px',
+  },
+  emptyMessage: {
+    fontSize: '16px',
+    color: '#888888',
+  },
+  subjectItem: {
+    margin: '5px 0',
+    padding: '10px',
+    backgroundColor: '#2E2E2E',
+    borderRadius: '4px',
+    border: '1px solid #00ADB5',
+  },
   subjectText: {
-    color: '#fff',
+    fontSize: '16px',
   },
   addButton: {
-    backgroundColor: '#27ae60',
-    color: '#fff',
-    padding: '12px',
-    borderRadius: '8px',
+    padding: '10px 20px',
+    backgroundColor: '#00ADB5',
+    color: '#121212',
+    borderRadius: '4px',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '16px',
+    margin: '20px 0',
   },
   buttonGroup: {
     display: 'flex',
     justifyContent: 'space-between',
   },
   submitButton: {
-    backgroundColor: '#2ecc71',
-    padding: '12px',
-    borderRadius: '8px',
+    padding: '10px 20px',
+    backgroundColor: '#00ADB5',
+    color: '#121212',
+    borderRadius: '4px',
     border: 'none',
     cursor: 'pointer',
-    color: '#fff',
-    fontWeight: '600',
   },
   cancelButton: {
-    backgroundColor: '#e74c3c',
-    padding: '12px',
-    borderRadius: '8px',
+    padding: '10px 20px',
+    backgroundColor: '#E63946',
+    color: '#121212',
+    borderRadius: '4px',
     border: 'none',
     cursor: 'pointer',
-    color: '#fff',
-    fontWeight: '600',
   },
   modalOverlay: {
     position: 'fixed',
     top: '0',
     left: '0',
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    right: '0',
+    bottom: '0',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: '10px',
-    padding: '20px',
-    width: '500px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    backgroundColor: '#121212',
+    padding: '30px',
+    borderRadius: '8px',
+    width: '600px',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+    color: '#E0E0E0',
   },
   modalHeading: {
-    textAlign: 'center',
-    fontSize: '22px',
-    fontWeight: '600',
-    color: '#34495e',
+    fontSize: '24px',
+    fontWeight: 'bold',
     marginBottom: '20px',
+    textAlign: 'center',
+    color: '#00ADB5',
   },
   modalForm: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '15px',
+    gap: '10px',
   },
   modalInput: {
-    padding: '12px',
-    borderRadius: '8px',
-    border: '1px solid #ddd',
+    padding: '10px',
+    borderRadius: '4px',
+    border: '1px solid #00ADB5',
+    backgroundColor: '#1E1E1E',
+    color: '#FFFFFF',
+    outline: 'none',
+  },
+  creditDisplay: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#00ADB5',
+    textAlign: 'center',
+    marginTop: '10px',
   },
   modalButtonGroup: {
     display: 'flex',
@@ -392,21 +427,22 @@ const styles = {
     marginTop: '20px',
   },
   modalAddButton: {
-    backgroundColor: '#2980b9',
-    color: '#fff',
-    padding: '12px',
-    borderRadius: '8px',
+    padding: '10px 20px',
+    backgroundColor: '#00ADB5',
+    color: '#121212',
+    borderRadius: '4px',
     border: 'none',
     cursor: 'pointer',
   },
   modalCancelButton: {
-    backgroundColor: '#c0392b',
-    color: '#fff',
-    padding: '12px',
-    borderRadius: '8px',
+    padding: '10px 20px',
+    backgroundColor: '#E63946',
+    color: '#121212',
+    borderRadius: '4px',
     border: 'none',
     cursor: 'pointer',
   },
 };
+
 
 export default AddSubjects;

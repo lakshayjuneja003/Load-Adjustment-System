@@ -1,11 +1,12 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoute";
-import AdminDashboard from "../components/Dashboard/AdminDashboard";
-import StaffDashboard from "../components/Dashboard/StaffDashboard";
+import AdminDashboard from "../components/Admin/AdminDashboard";
+import StaffDashboard from "../components/Staff/StaffDashboard";
 import Login from "../components/auth/Login";
 import Signup from "../components/auth/Signup";
-import AddSubjects from "../components/AddSubjects"; // Import the AddSubjects component
+import AddSubjects from "../components/Admin/AddSubjects"; // Import the AddSubjects component
+import AdminProfile from "../components/Admin/AdminProfile";
 
 const AppRoutes = () => {
   return (
@@ -17,7 +18,7 @@ const AppRoutes = () => {
         <Route
           path="dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="admin">
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -25,8 +26,16 @@ const AppRoutes = () => {
         <Route
           path="add-subjects" // Add the route for the AddSubjects component
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="admin">
               <AddSubjects />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="profile" // Add the route for the AddSubjects component
+          element={
+            <ProtectedRoute role="admin">
+              <AdminProfile />
             </ProtectedRoute>
           }
         />
@@ -39,7 +48,7 @@ const AppRoutes = () => {
         <Route
           path="dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="user">
               <StaffDashboard />
             </ProtectedRoute>
           }

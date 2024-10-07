@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { authAtom } from '../../store/authStore/authAtom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = ({ role }) => {
@@ -67,7 +67,7 @@ const Login = ({ role }) => {
         />
         <button onClick={handleLogin} style={styles.button}>Login</button>
         <p style={styles.footerText}>
-          Don't have an account? <a href={`/${role}/signup`} style={styles.link}>Signup</a>
+          Don't have an account? <Link to={`/${role}/signup`} style={styles.link}>Signup</Link>
         </p>
       </div>
     </div>

@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { verifyJWT, verifyAdmin } from "../middlewares/auth.middleware.js";
-import { AddSubjects, adminDashboard, adminLogin, adminRegister, DeleteSubject, GetSubjects, UpdateSubject } from "../contollers/adminController.js";
+import { AddSubjects, adminDashboard, adminLogin, adminRegister, DeleteSubject, GetSubjects, Profile, UpdateSubject } from "../contollers/adminController.js";
 
 const router = Router();
 
 router.post("/register", adminRegister);
 router.post("/login", adminLogin);
+router.get("/me" , verifyJWT , verifyAdmin , Profile);
 router.get("/dashboard", verifyJWT, verifyAdmin, adminDashboard);
 router.post("/add-subjects" ,verifyJWT, verifyAdmin , AddSubjects)
 router.get("/subjects" ,verifyJWT, verifyAdmin , GetSubjects);

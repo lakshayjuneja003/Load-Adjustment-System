@@ -92,7 +92,7 @@ const ShowSubjects = ({ subjects, fetchSubjects }) => {
         {subjects.map(subject => (
           <div key={subject._id} className="subject-card">
             <div className="card-body">
-              <p className="subject-name">
+              <p className="subject-name capatlize">
                 <strong>{subject.subjectName}</strong> ({subject.subjectCode})
               </p>
               <p>Year: {subject.year}, Semester: {subject.semester}</p>

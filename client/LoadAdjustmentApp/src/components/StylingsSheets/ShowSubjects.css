@@ -27,6 +27,9 @@
   align-items: center;
   justify-content: center;
 }
+.capatlize{
+  text-transform: uppercase;
+}
 
 /* Edit Button Styles */
 .edit-button {

@@ -18,41 +18,89 @@ export const adminRegister = async (req, res) => {
     }
 
     // Create new admin user
-    const newUser = new User({ username, email, fullname, password, role: "Admin" });
-    await newUser.save();
+    const newUser = await User.create({
+      username, email, fullname, password, role: "Admin"
+    });
 
-    return res.status(201).json({ message: "Admin registered successfully", user: newUser });
+    // Exclude sensitive fields like password and refreshToken manually
+    const { password: _, refreshToken, ...userResponse } = newUser.toObject();
+
+    if (newUser) {
+      return res.status(201).json({ message: "Admin registered successfully", user: userResponse });
+    }
   } catch (error) {
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
+
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
 
+  console.log("Incoming request body:", req.body);
+
   try {
-    if (!email || !password) return res.status(403).json({ message: "Email and password required" });
+    // Check if both email and password are provided
+    if (!email || !password) {
+      return res.status(403).json({ message: "Email and password required" });
+    }
 
+    // Retrieve the user without excluding the password field
     const user = await User.findOne({ email, role: "Admin" });
-    if (!user) return res.status(403).json({ message: "Admin does not exist" });
 
+    if (!user) {
+      return res.status(403).json({ message: "Admin does not exist" });
+    }
+
+    // Compare entered password with the stored hashed password
     const isPasswordCorrect = await user.isPasswordCorrect(password);
-    if (!isPasswordCorrect) return res.status(403).json({ message: "Invalid Credentials" });
+    if (!isPasswordCorrect) {
+      return res.status(403).json({ message: "Invalid Credentials" });
+    }
 
+    // Generate access and refresh tokens
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
+    // Store refresh token in the user model
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie(
-        "refreshToken", 
-        refreshToken, 
-        { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }
-    );
-    return res.status(200).json({ message: "Login successful", token: accessToken, user, role: "Admin" });
+    // Set the refresh token in an HTTP-only cookie
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+    // Exclude sensitive fields before sending the response
+    const { password: _, refreshToken: __, ...userResponse } = user.toObject();
+
+    // Return the response
+    return res.status(200).json({ message: "Login successful", token: accessToken, user: userResponse, role: "Admin" });
   } catch (error) {
+    console.error("Server Error:", error); // Log the actual error
     return res.status(500).json({ message: "Server Error", error: error.message });
+  }
+}
+
+export const Profile = async (req, res) => {
+  try {
+    // Getting the user ID from the request object
+    const userId = req.user._id; // Use _id if using Mongoose ID convention
+    const userProfile = await User.findById(userId).select('-password -refreshToken'); // Use findById with the correct user ID
+
+    if (!userProfile) {
+      return res.status(404).json({
+        message: "No user found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "User fetched successfully",
+      user: userProfile,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error while fetching profile",
+      error: error.message, // Return the error message for better debugging
+    });
   }
 };
 
