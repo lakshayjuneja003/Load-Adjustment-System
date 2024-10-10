@@ -1,47 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import TopNavBar from '../Admin/TopNav.jsx';
-import axios from 'axios';
 import './StaffDashboard.css'; // Import CSS for additional styling
+import { useNavigate } from 'react-router-dom';
+import useUserVerification from '../../customHooks/UseUserVerification.jsx';
 
 const StaffDashboard = () => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await axios.get('http://localhost:3004/api/v1/user/me', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          withCredentials: true,
-        });
-        setUser(response.data.user);
-      } catch (err) {
-        console.error("Error fetching user profile:", err);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-
+  const navigate = useNavigate();
+  const { userInfo, isVerified, loading, error } = useUserVerification(); // Using the modified custom hook
+  
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/staff/login');
   };
 
+  if (loading) {
+    return <p>Loading verification status...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+  if (isVerified === false) {
+    return (
+      <div className="staff-dashboard-container">
+        <TopNavBar role="Staff" handleLogout={handleLogout} />
+        <div className="staff-dashboard-content">
+          <h1 className="dashboard-title">Staff Dashboard</h1>
+          <p>You must be verified to access this dashboard.</p>
+          {/* You can include a button to request verification or contact admin */}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="staff-dashboard-container">
-      <TopNavBar role="Staff" handleLogout={handleLogout} /> {/* Use TopNavBar with role="Staff" */}
+      <TopNavBar role="Staff" handleLogout={handleLogout} />
       <div className="staff-dashboard-content">
         <h1 className="dashboard-title">Staff Dashboard</h1>
-        {user ? (
+        {userInfo && (
           <div className="greeting-card">
-            <h2>Welcome, {user.fullname}!</h2>
+            <h2>Welcome, {userInfo.name}!</h2>
             <p>We're glad to have you here. Below, you can view your assigned tasks and manage your preferences.</p>
-          </div>
-        ) : (
-          <div className="loading-card">
-            <p>Loading user details...</p>
           </div>
         )}
         <div className="dashboard-cards">

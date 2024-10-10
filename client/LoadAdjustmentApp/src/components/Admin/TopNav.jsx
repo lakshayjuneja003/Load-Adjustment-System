@@ -1,9 +1,8 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import '../StylingsSheets/TopNavBar.css'; 
 
 const TopNavBar = ({ role, handleLogout }) => {
-  const navigate = useNavigate();
 
   return (
     <div className="top-nav">
@@ -17,7 +16,7 @@ const TopNavBar = ({ role, handleLogout }) => {
         {role === 'Admin' && (
           <>
             <Link to="/admin/add-subjects" className="nav-link">Add Subjects</Link>
-            <Link to="/admin/show-subjects" className="nav-link">Show Subjects</Link>
+            <Link to="/admin/pendingrequests" className="nav-link">Pending Requests</Link>
           </>
         )}
         {role === 'Staff' && (

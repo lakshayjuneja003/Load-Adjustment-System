@@ -1,0 +1,27 @@
+.submit-button {
+    background-color: #28a745; /* Bootstrap success color */
+    color: white;
+    border: none;
+    padding: 12px 25px; /* Adjust padding as needed */
+    border-radius: 5px;
+    font-size: 16px; /* Font size */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+    display: inline-block; /* Allows margin and padding to apply correctly */
+  }
+  
+  .submit-button:hover {
+    background-color: #218838; /* Darker green on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+  }
+  
+  .submit-button:disabled {
+    background-color: #6c757d; /* Grey background when disabled */
+    cursor: not-allowed; /* Change cursor to not-allowed */
+  }
+  
+  .submit-button:focus {
+    outline: none; /* Remove outline on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a blue shadow on focus */
+  }
+  

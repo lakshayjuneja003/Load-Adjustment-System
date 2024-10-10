@@ -10,10 +10,11 @@ const useFetchSubjects = () => {
     try {
       const response = await axios.get('http://localhost:3004/api/v1/admin/subjects', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        withCredentials: true,
-      });
+        withCredentials: true, 
+    });
+    
 
       if (response.data) {
         setSubjects(response.data.data); // handle the response data

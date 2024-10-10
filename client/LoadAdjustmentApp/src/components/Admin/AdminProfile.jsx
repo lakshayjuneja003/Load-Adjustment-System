@@ -36,11 +36,11 @@ const AdminProfile = () => {
 
   return (
     <>
-    <TopNavBar/>
+    <TopNavBar role={"Admin"}/>
     <div className="profile-container">
       <h2>Admin Profile</h2>
       <div className="profile-details">
-        <p><strong>Full Name:</strong> {user.fullname}</p>
+        <p><strong>Name:</strong> {user.name}</p>
         <p><strong>Email:</strong> {user.email}</p>
         <p><strong>Role:</strong> {user.role}</p>
         <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>

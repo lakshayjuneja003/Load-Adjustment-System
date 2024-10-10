@@ -1,30 +1,37 @@
+import SemesterConfig from "../schemas/SemstersConfig.js";
 import Subject from "../schemas/Subject.js";
 import { User } from "../schemas/userSchema.js";
-
+import { VerificationRequest } from "../schemas/Verificationrequests.js";
 
 export const adminRegister = async (req, res) => {
   try {
-    const { email, fullname, password, username } = req.body;
+    const { email, name, password, empId } = req.body;
 
-    // Check if all fields are provided
-    if (!email || !fullname || !password || !username) {
+    // Check if all required fields are provided
+    if (!email || !name || !password || !empId) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if user already exists
-    const userExists = await User.findOne({ $or: [{ email }, { username }] });
+    // Check if user with the same email or empId already exists
+    const userExists = await User.findOne({ $or: [{ email }, { empId }] });
     if (userExists) {
-      return res.status(409).json({ message: "User already exists" });
+      return res.status(409).json({ message: "User with this email or empId already exists" });
     }
 
-    // Create new admin user
+    // Create a new Admin user
     const newUser = await User.create({
-      username, email, fullname, password, role: "Admin"
+      name,
+      email,
+      password,
+      empId,        // Including the empId for Admins
+      role: "Admin",
+      isVerified: true, // Admin is automatically verified
     });
 
     // Exclude sensitive fields like password and refreshToken manually
-    const { password: _, refreshToken, ...userResponse } = newUser.toObject();
+    const { password: _, ...userResponse } = newUser.toObject();
 
+    // Respond with the newly created admin user details
     if (newUser) {
       return res.status(201).json({ message: "Admin registered successfully", user: userResponse });
     }
@@ -42,10 +49,10 @@ export const adminLogin = async (req, res) => {
   try {
     // Check if both email and password are provided
     if (!email || !password) {
-      return res.status(403).json({ message: "Email and password required" });
+      return res.status(403).json({ message: "Email and password are required" });
     }
 
-    // Retrieve the user without excluding the password field
+    // Retrieve the Admin user without excluding the password field
     const user = await User.findOne({ email, role: "Admin" });
 
     if (!user) {
@@ -53,32 +60,104 @@ export const adminLogin = async (req, res) => {
     }
 
     // Compare entered password with the stored hashed password
-    const isPasswordCorrect = await user.isPasswordCorrect(password);
+    const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
       return res.status(403).json({ message: "Invalid Credentials" });
     }
 
     // Generate access and refresh tokens
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
-
-    // Store refresh token in the user model
-    user.refreshToken = refreshToken;
-    await user.save();
+    const accessToken = user.generateToken();
 
     // Set the refresh token in an HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
     // Exclude sensitive fields before sending the response
-    const { password: _, refreshToken: __, ...userResponse } = user.toObject();
+    const { password: __, ...userResponse } = user.toObject();
 
-    // Return the response
-    return res.status(200).json({ message: "Login successful", token: accessToken, user: userResponse, role: "Admin" });
+    // Return the response including empId and designation if needed
+    return res.status(200).json({
+      message: "Login successful",
+      token: accessToken,
+      user: {
+        ...userResponse
+      },
+      role: "Admin",
+    });
   } catch (error) {
     console.error("Server Error:", error); // Log the actual error
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
-}
+};
+
+export const getPendingVerifications = async (req, res) => {
+  try {
+    console.log("User incoming body req.user :" ,req.user);
+    
+    // Get admin's invitation URL from authenticated admin data
+    const { invitationUrl } = req.user;
+    console.log("adminInvitationUrl : ",invitationUrl);
+    
+
+    // Fetch pending verification requests for the admin's invitation URL
+    const pendingRequests = await VerificationRequest.find({ invitationUrl: invitationUrl })
+      .populate('userId', 'name email empId isVerified'); // Populate user details
+      console.log(pendingRequests);
+      
+
+    return res.status(200).json({ pendingRequests });
+  } catch (error) {
+    return res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+export const verifyUser = async (req, res) => {
+  try {
+    const { userId } = req.body; // You may need to pass the invitation URL to delete the correct request
+
+    // Find the user to verify
+    const userToVerify = await User.findById(userId);
+    if (!userToVerify) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user verification status
+    userToVerify.isVerified = true;
+    await userToVerify.save();
+
+    // Delete the verification request after the user has been verified
+    await VerificationRequest.deleteOne({ userId: userId }); 
+    console.log("Deleted verification request for userId:", userId);
+
+    return res.status(200).json({ message: "User verified successfully", user: userToVerify });
+  } catch (error) {
+    return res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+export const rejectUser = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    // Find the user to reject
+    const userToReject = await User.findById(userId);
+    if (!userToReject) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete the verification request for the admin user
+    const deletionResult = await VerificationRequest.deleteOne({ userId: userId });
+    
+    // Check if any document was deleted
+    if (deletionResult.deletedCount === 0) {
+      return res.status(404).json({ message: "No verification request found for this user." });
+    }
+
+    return res.status(200).json({ message: "User rejected successfully", user: userToReject });
+  } catch (error) {
+    console.error("Error rejecting user:", error); // Log the error for debugging
+    return res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 
 export const Profile = async (req, res) => {
   try {
@@ -143,9 +222,6 @@ export const AddSubjects = async (req, res) => {
   }
 };
 
-
-
-
 // Get subjects created by a specific admin
 export const GetSubjects = async (req, res) => {
   try {
@@ -208,3 +284,54 @@ export const DeleteSubject = async (req, res) => {
   }
 };
 
+
+export const SetCurrentRoutes = async (req, res) => {
+  try {
+    const { totalSemesters, activeSemesters } = req.body;
+    const adminId = req.user._id; // Assuming the user making this request is the Admin
+    if (!totalSemesters || !activeSemesters) {
+      return res.status(400).json({
+        message: 'Total semesters and active semesters are required.'
+      });
+    }
+
+    // Validate that active semesters are within the range of total semesters
+    const isValidActiveSemesters = activeSemesters.every(
+      sem => sem > 0 && sem <= totalSemesters
+    );
+    if (!isValidActiveSemesters) {
+      return res.status(400).json({
+        message: 'Active semesters must be within the range of total semesters.'
+      });
+    }
+
+    // Check if there is an existing configuration for the admin
+    let semesterConfig = await SemesterConfig.findOne({ adminId });
+
+    if (!semesterConfig) {
+      // Create a new config if none exists
+      semesterConfig = new SemesterConfig({
+        totalSemesters,
+        activeSemesters,
+        adminId
+      });
+    } else {
+      // Update the existing config
+      semesterConfig.totalSemesters = totalSemesters;
+      semesterConfig.activeSemesters = activeSemesters;
+    }
+
+    // Save the configuration
+    await semesterConfig.save();
+
+    return res.status(200).json({
+      message: 'Semester configuration updated successfully',
+      data: semesterConfig
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: 'Some error occurred',
+      errorObj: error
+    });
+  }
+};

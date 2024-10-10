@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Signup = ({ role }) => {
-  const [fullname, setFullname] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
+  const [empId, setEmpId] = useState('');
+  const [designation, setDesignation] = useState(''); // New state for designation
+  const [invitationUrl, setInvitationUrl] = useState(''); // New state for invitation URL
   const [error, setError] = useState(''); // State for error messages
   const navigate = useNavigate();
 
@@ -17,17 +19,19 @@ const Signup = ({ role }) => {
         ? 'http://localhost:3004/api/v1/admin/register'
         : 'http://localhost:3004/api/v1/user/register';
 
-      const response = await axios.post(endpoint, {
-        fullname,
-        username,
+      const data = {
+        name,
+        empId,
         email,
         password,
-      });
+        ...(role === 'staff' && { designation, invitationUrl }) // Include only for staff
+      };
+
+      const response = await axios.post(endpoint, data);
       console.log(response);
       
-
       if (response.status === 201) {
-        navigate(`${role}/login`);
+        navigate(`/${role}/login`);
       } else {
         setError(response.data.message || 'Signup failed. Please try again.');
       }
@@ -42,18 +46,19 @@ const Signup = ({ role }) => {
       <div style={styles.loginContainer}>
         <h2 style={styles.heading}>{role.charAt(0).toUpperCase() + role.slice(1)} Signup</h2>
         {error && <p style={styles.errorText}>{error}</p>}
+        
         <input
           type="text"
-          placeholder="Fullname"
-          value={fullname}
-          onChange={(e) => setFullname(e.target.value)}
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           style={styles.input}
         />
         <input
           type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Employee ID"
+          value={empId}
+          onChange={(e) => setEmpId(e.target.value)}
           style={styles.input}
         />
         <input
@@ -70,13 +75,35 @@ const Signup = ({ role }) => {
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
         />
+        
+        {role === 'staff' && (
+          <>
+            <select
+              value={designation}
+              onChange={(e) => setDesignation(e.target.value)}
+              style={styles.input}
+            >
+              <option value="">Select Designation</option>
+              <option value="Professor">Professor</option>
+              <option value="Associate Professor">Associate Professor</option>
+              <option value="Assistant Professor">Assistant Professor</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Invitation URL"
+              value={invitationUrl}
+              onChange={(e) => setInvitationUrl(e.target.value)}
+              style={styles.input}
+            />
+          </>
+        )}
+
         <button onClick={handleSignup} style={styles.button}>
           Signup
         </button>
 
         <p style={styles.footerText}>
           Have an account? <Link to={`/${role}/login`} style={styles.link}>Signin</Link>
-
         </p>
       </div>
     </div>

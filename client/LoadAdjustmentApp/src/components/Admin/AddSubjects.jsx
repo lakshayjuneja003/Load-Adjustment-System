@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import TopNavBar from './TopNav';
 
 const AddSubjects = () => {
   const navigate = useNavigate();
@@ -113,6 +114,9 @@ const AddSubjects = () => {
   };
 
   return (
+    <>
+    <TopNavBar role={"Admin"}/>
+
     <div style={styles.container}>
       <h1 style={styles.heading}>Add Subjects</h1>
       <form onSubmit={handleSubmit} style={styles.form}>
@@ -278,13 +282,14 @@ const AddSubjects = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 const styles = {
   container: {
     padding: '20px',
     maxWidth: '900px',
-    margin: '0 auto',
+    margin: '10px auto',
     fontFamily: "'Roboto', sans-serif",
     backgroundColor: '#121212',
     color: '#E0E0E0',

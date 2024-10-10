@@ -1,0 +1,31 @@
+.subject-button {
+    background-color: #007bff; /* Primary button color */
+    color: white;
+    border: none;
+    padding: 10px 20px; /* Adjust padding as needed */
+    border-radius: 5px;
+    font-size: 14px; /* Font size */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+    display: inline-block; /* Aligns button in line */
+    margin: 5px; /* Space between buttons */
+  }
+  
+  .subject-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+  }
+  
+  .subject-button:focus {
+    outline: none; /* Remove outline on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a blue shadow on focus */
+  }
+  
+  .subject-button.selected {
+    background-color: #28a745; /* Green color for selected state */
+  }
+  
+  .subject-button.selected:hover {
+    background-color: #218838; /* Darker green on hover when selected */
+  }
+  

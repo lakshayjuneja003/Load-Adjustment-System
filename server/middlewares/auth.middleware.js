@@ -6,7 +6,8 @@ export const verifyJWT = async (req, res, next) => {
   try {
     // Get the token from cookies or the Authorization header
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-
+    console.log("token for authorization :  " ,token);
+    
     // Check if the token is present
     if (!token) {
       return res.status(401).json({ message: "Unauthorized: No token provided" });
@@ -14,10 +15,12 @@ export const verifyJWT = async (req, res, next) => {
 
     // Verify the token with the access secret key
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
+    console.log(decodedToken);
+    
     // Check if the user exists in the database
-    const user = await User.findById(decodedToken._id).select("-password -refreshToken");
-
+    const user = await User.findById(decodedToken.id).select("-password");
+    console.log(user);
+    
     if (!user) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }

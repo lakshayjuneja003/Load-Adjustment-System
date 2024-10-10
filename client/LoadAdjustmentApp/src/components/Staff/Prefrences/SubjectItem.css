@@ -1,0 +1,48 @@
+.subject-item {
+    background-color: #f8f9fa; /* Light background for subject items */
+    border: 1px solid #ced4da; /* Light border for distinction */
+    border-radius: 5px;
+    padding: 15px; /* Padding for inner spacing */
+    margin: 10px 0; /* Vertical margin between items */
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Space between subject name and button */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.2s; /* Smooth transformation on hover */
+  }
+  
+  .subject-item:hover {
+    transform: scale(1.02); /* Slightly enlarge on hover for emphasis */
+  }
+  
+  .subject-name {
+    font-size: 16px; /* Font size for the subject name */
+    font-weight: 500; /* Semi-bold text */
+    color: #343a40; /* Darker text color */
+  }
+  
+  .subject-credits {
+    font-size: 14px; /* Font size for credits */
+    color: #6c757d; /* Gray color for credits */
+  }
+  
+  .subject-button-container {
+    display: flex; /* Aligns button with any additional elements */
+    align-items: center; /* Centers vertically */
+  }
+  
+  .subject-button {
+    background-color: #007bff; /* Button color */
+    color: white;
+    border: none;
+    padding: 8px 12px; /* Padding for the button */
+    border-radius: 4px; /* Slightly smaller border radius */
+    font-size: 14px; /* Font size for the button */
+    cursor: pointer;
+    transition: background-color 0.3s; /* Transition for hover */
+  }
+  
+  .subject-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  

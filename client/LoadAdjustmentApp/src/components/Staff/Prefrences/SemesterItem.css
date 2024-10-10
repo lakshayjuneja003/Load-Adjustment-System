@@ -1,0 +1,36 @@
+.semester-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.3s;
+  }
+  
+  .semester-item:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  h3 {
+    color: #444;
+    margin-bottom: 10px;
+  }
+  
+  .subject-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .subject-item {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 5px;
+    transition: background-color 0.3s;
+  }
+  
+  .subject-item:hover {
+    background-color: #e6f7ff;
+  }
+  

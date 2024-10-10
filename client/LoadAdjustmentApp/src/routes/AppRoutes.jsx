@@ -7,6 +7,10 @@ import Login from "../components/auth/Login";
 import Signup from "../components/auth/Signup";
 import AddSubjects from "../components/Admin/AddSubjects"; // Import the AddSubjects component
 import AdminProfile from "../components/Admin/AdminProfile";
+import PendingRequests from "../components/Admin/Pendingrequest";
+import MakeNewVerificationRequest from "../components/Staff/MakeNewVerificationRequest,";
+import SetSemesters from "../components/Admin/SetSemstersActive";
+import SemestersList from "../components/Staff/Prefrences/SemstersList";
 
 const AppRoutes = () => {
   return (
@@ -39,6 +43,23 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="setActiveSems" // Add the route for the AddSubjects component
+          element={
+            <ProtectedRoute role="admin">
+              <SetSemesters />
+            </ProtectedRoute>
+          }
+        />
+
+      <Route
+          path="pendingrequests" // Add the route for the AddSubjects component
+          element={
+            <ProtectedRoute role="admin">
+              <PendingRequests />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Staff Routes */}
@@ -50,6 +71,23 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute role="user">
               <StaffDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+          <Route
+          path="preferences"
+          element={
+            <ProtectedRoute role="user">
+              <SemestersList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="PutAnotherVerificationRequest"
+          element={
+            <ProtectedRoute role="user">
+              <MakeNewVerificationRequest />
             </ProtectedRoute>
           }
         />
