@@ -1,81 +1,73 @@
 import SemesterConfig from "../schemas/SemstersConfig.js";
 import Subject from "../schemas/Subject.js";
+import { TeacherSubject } from "../schemas/TeacherSubjectMapping.js";
 import { User } from "../schemas/userSchema.js";
 import { VerificationRequest } from "../schemas/Verificationrequests.js";
 
 export const userRegister = async (req, res) => {
+  console.log("Req body for user : ", req.body);
+  
   try {
-    const { email, name, password, empId, designation, invitationUrl } = req.body;
-
-    if (!email || !name || !password || !empId || !designation || !invitationUrl) {
+    const { email, name, password, empId, designation, invitationUrl , universityCode } = req.body;
+  
+    if (!email || !name || !password || !empId || !designation || !invitationUrl || !universityCode) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
     // Check if the admin exists with the given invitation URL
-    const adminUser = await User.findOne({ invitationUrl });
+    const adminUser = await User.findOne({ _id: invitationUrl , universityCode});
     if (!adminUser) {
       return res.status(402).json({ message: "Invalid or expired invitation URL" });
     }
 
     // Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    const userExists = await User.findOne({ email  , universityCode});
+    if (userExists) { 
       return res.status(409).json({ message: "User already exists" });
     }
 
     // Create a new user with the admin's ID as createdBy
-    const newUser = new User({
+    const newUser =  await User.create({
       empId,
       email,
       name,
       password,
-      createdBy: adminUser._id,
+      staffCreatedBy: adminUser._id,
       role: "Staff",
       designation,
       invitationUrl,
+      universityCode
     });
-
-    // Save the new user to the database
-    await newUser.save();
-
     // Create a verification request
     const verificationRequest = new VerificationRequest({
       userId: newUser._id,
       invitationUrl,
     });
 
+
     // Save the verification request to the database
     await verificationRequest.save();
-
     // Check if verification request was successfully created
     if (!verificationRequest) {
       return res.status(404).json({
         message: "Error while creating verification request",
       });
     }
-
     return res.status(201).json({ message: "Staff registered successfully", user: newUser });
   } catch (error) {
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-
-
 export const userLogin = async (req, res) => {
-  const { email, password } = req.body;
-
-  console.log("Incoming request body:", req.body);
-
   try {
+    const { email, password , universityCode} = req.body;
     // Check if both email and password are provided
-    if (!email || !password) {
+    if (!email || !password || !universityCode) {
       return res.status(403).json({ message: "Email and password are required" });
     }
 
     // Retrieve the Admin user without excluding the password field
-    const user = await User.findOne({ email, role: "Staff" });
-
+    const user = await User.findOne({ email, role: "Staff" , universityCode });
     if (!user) {
       return res.status(403).json({ message: "Staff does not exist" });
     }
@@ -109,6 +101,7 @@ export const userLogin = async (req, res) => {
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 export const UserProfile = async (req, res) => {
   try {
     // Getting the user ID from the request object
@@ -132,6 +125,7 @@ export const UserProfile = async (req, res) => {
     });
   }
 };
+
 export const userDashboard = (req, res) => {
   return res.status(200).json({ message: "Welcome to the staff dashboard" });
 };
@@ -224,7 +218,6 @@ export const putVerificationRequest = async (req, res, next) => {
   }
 };
 
-
 export const getActiveSemestersWithSubjects = async (req, res) => {
   try {
     // Fetch the current semester configuration set by the admin who created the staff user
@@ -274,3 +267,55 @@ export const getActiveSemestersWithSubjects = async (req, res) => {
   }
 };
 
+export const assignTeacherToSubject = async (req, res) => {
+  try {
+    const { teacherId, subjectId, department, priority } = req.body;
+
+    if (!teacherId || !subjectId || !department) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // prevent duplicate mapping
+    const existing = await TeacherSubject.findOne({
+      teacherId,
+      subjectId
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Teacher already assigned to this subject"
+      });
+    }
+
+    const mapping = await TeacherSubject.create({
+      teacherId,
+      subjectId,
+      department,
+      priority
+    });
+
+    res.status(201).json({
+      message: "Teacher assigned to subject",
+      data: mapping
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+export const getTeachersForSubject = async (req, res) => {
+  try {
+    const { subjectId } = req.body;
+
+    const mappings = await TeacherSubject.find({ subjectId })
+    console.log("data fetched techers : " , mappings)
+    return res.status(200).json({
+      message: "Teachers fetched",
+      data: mappings
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

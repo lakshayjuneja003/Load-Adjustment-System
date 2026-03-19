@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../schemas/userSchema.js";
+import { SuperAdmin } from "../schemas/SuperAdmin.js";
 
 // Middleware to verify JWT token
 export const verifyJWT = async (req, res, next) => {
@@ -16,11 +17,15 @@ export const verifyJWT = async (req, res, next) => {
     // Verify the token with the access secret key
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     console.log(decodedToken);
-    
-    // Check if the user exists in the database
-    const user = await User.findById(decodedToken.id).select("-password");
+    let user = undefined;
+    // checks if the user is superAdmin or not
+    if(decodedToken.role === "SuperAdmin"){
+      user = await SuperAdmin.findById(decodedToken.id).select("-password")
+    }
+    else{
+      user = await User.findById(decodedToken.id).select("-password");
+    }
     console.log(user);
-    
     if (!user) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
@@ -46,6 +51,13 @@ export const verifyAdmin = (req, res, next) => {
 export const verifyStaff = (req, res, next) => {
   if (req.user.role !== "Staff") {
     return res.status(403).json({ message: "Forbidden: Staff members only" });
+  }
+  next();
+};
+
+export const verifySuperAdmin = (req, res, next) => {
+  if (req.user.role !== "SuperAdmin") {
+    return res.status(403).json({ message: "Forbidden: Super Admins only" });
   }
   next();
 };

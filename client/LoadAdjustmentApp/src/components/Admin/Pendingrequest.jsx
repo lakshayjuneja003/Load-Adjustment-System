@@ -10,6 +10,8 @@ const PendingRequests = () => {
   const [verifyState, setVerifyState] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
+    let isMounted = true; // flag to check if the component is mounted
+  
     const fetchData = async () => {
       try {
         const response = await axios.get(
@@ -21,26 +23,48 @@ const PendingRequests = () => {
             withCredentials: true,
           }
         );
-
-        console.log(response.data.pendingRequests);
-
-        if (response.data && response.data.pendingRequests) {
-          if (response.data.pendingRequests.length >= 1) {
-            setRequests([...response.data.pendingRequests]);
-            setStatus("Pending Requests:");
+  
+        if (response.status === 200) { // Successful response
+          if (response.data && response.data.pendingRequests) {
+            if (response.data.pendingRequests.length > 0) {
+              if (isMounted) {
+                setRequests([...response.data.pendingRequests]);
+                setStatus("Pending Requests:");
+              }
+            } else {
+              if (isMounted) {
+                setStatus("No pending requests");
+              }
+            }
           } else {
-            setStatus("No Pending requests");
+            if (isMounted) {
+              setStatus("Error occurred, please try again later");
+            }
+          }
+        } else if (response.status === 202) { // Admin is not verified
+          if (isMounted) {
+            setStatus(response.data.message || "Admin not verified, please check your status.");
           }
         } else {
-          setStatus("Error occurred, please try again later");
+          if (isMounted) {
+            setStatus("Error occurred, please try again later");
+          }
         }
       } catch (error) {
         console.log("Error occurred:", error);
-        setStatus("Unable to fetch requests");
+        if (isMounted) {
+          setStatus("Unable to fetch requests");
+        }
       }
     };
+  
     fetchData();
+  
+    return () => {
+      isMounted = false; // cleanup function to avoid setting state on unmounted component
+    };
   }, []);
+  
 
   const handleAccept = async (id) => {
     console.log("Accepted user with id ", id);

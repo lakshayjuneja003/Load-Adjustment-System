@@ -1,0 +1,51 @@
+/* Container for displaying permissions */
+.get-permissions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    background: linear-gradient(135deg, #f7faff, #ffffff);
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Title styling */
+.get-permissions h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+/* Permission items styling */
+.value {
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    color: #555;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.value:hover {
+    background-color: #e0e7ff;
+    border-color: #4a90e2;
+}
+
+/* Message styling for no permissions */
+.no-permissions-message {
+    font-size: 1rem;
+    color: #888;
+    font-weight: bold;
+    margin-top: 1rem;
+}

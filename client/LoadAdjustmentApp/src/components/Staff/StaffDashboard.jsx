@@ -6,7 +6,7 @@ import useUserVerification from '../../customHooks/UseUserVerification.jsx';
 
 const StaffDashboard = () => {
   const navigate = useNavigate();
-  const { userInfo, isVerified, loading, error } = useUserVerification(); // Using the modified custom hook
+  const { userInfo, isVerified, loading, error } = useUserVerification(); 
   
   const handleLogout = () => {
     localStorage.removeItem('token');

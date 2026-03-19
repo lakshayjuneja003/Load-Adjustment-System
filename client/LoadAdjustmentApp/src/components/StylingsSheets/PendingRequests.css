@@ -37,7 +37,7 @@
     gap: 10px;
   }
   
-  .accept-btn, .reject-btn {
+  .accept-btn, .reject-btn , .edit-btn , .save-btn {
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
@@ -63,4 +63,31 @@
   .reject-btn:hover {
     background: #e53935;
   }
-  
+  .save-btn{
+    background: #4CAF50;
+    color: white;
+  }
+  .edit-btn{
+    background: #4CAF50;
+    color: white;
+  }
+
+  .delete-btn{
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+    background-color: #f44336 ;
+    margin: 5px;
+  }
+  .editable-input{
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s ease;
+    border: 1px dotted black;
+  }

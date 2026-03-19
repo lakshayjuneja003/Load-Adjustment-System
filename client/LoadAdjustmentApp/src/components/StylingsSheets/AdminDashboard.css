@@ -1,5 +1,6 @@
 /* General Admin Container Styling */
 .admin-container {
+  margin-top: 70px;
   padding: 20px;
   background-color: #f8f9fa; /* Light gray background */
   border-radius: 10px;

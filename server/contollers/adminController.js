@@ -1,59 +1,86 @@
+import { AdminVerification } from "../schemas/AdminVerificationRequest.js";
 import SemesterConfig from "../schemas/SemstersConfig.js";
 import Subject from "../schemas/Subject.js";
+import { SuperAdmin } from "../schemas/SuperAdmin.js";
 import { User } from "../schemas/userSchema.js";
 import { VerificationRequest } from "../schemas/Verificationrequests.js";
+import Permissions from "../schemas/PermissionsSchema.js"
+import mongoose from 'mongoose';
+import { Section } from "../schemas/SectionsSchema.js";
+import { Room } from "../schemas/RoomSchema.js";
 
 export const adminRegister = async (req, res) => {
   try {
-    const { email, name, password, empId } = req.body;
-
+    const { email, name, password, empId, adminDept, invitedBy, pendingFunctionalities , universityCode } = req.body;
+    
     // Check if all required fields are provided
-    if (!email || !name || !password || !empId) {
+    if (!email || !name || !password || !empId || !adminDept || !invitedBy || !universityCode) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+    
+    // checking if the invitaionurl given by admin is actually valid or not
+    const Inviter = await SuperAdmin.findOne({invitationUrl : invitedBy})
+    if(!Inviter){
+      return res.status(400).json({
+        message: "Enter inivition url is not valid"
+      })
     }
 
     // Check if user with the same email or empId already exists
-    const userExists = await User.findOne({ $or: [{ email }, { empId }] });
+    const userExists = await User.findOne({email , role:"Admin" , universityCode});
     if (userExists) {
       return res.status(409).json({ message: "User with this email or empId already exists" });
     }
 
-    // Create a new Admin user
-    const newUser = await User.create({
+    // Create a new Admin user with pending status
+    const newAdmin = await User.create({
       name,
       email,
       password,
-      empId,        // Including the empId for Admins
+      empId,
       role: "Admin",
-      isVerified: true, // Admin is automatically verified
+      adminDept,
+      universityCode,
+      adminCreatedBy: invitedBy, // Linking to the super admin who invited
+      isVerified: false, // Admin is pending until approved
+      pendingFunctionalities: pendingFunctionalities || [] // Capture requested functionalities
+    });
+    
+    
+    // Notify the super admin about the pending admin registration
+    const verificationreq = new AdminVerification({
+      userId: newAdmin._id,
+      createdBy: invitedBy,
+      pendingFunctionalities : pendingFunctionalities
+    });
+    await verificationreq.save();
+
+    // Exclude sensitive fields like password
+    const { password: _, ...adminResponse } = newAdmin.toObject();
+
+    return res.status(201).json({ 
+      message: "Admin registration pending approval", 
+      admin: adminResponse 
     });
 
-    // Exclude sensitive fields like password and refreshToken manually
-    const { password: _, ...userResponse } = newUser.toObject();
-
-    // Respond with the newly created admin user details
-    if (newUser) {
-      return res.status(201).json({ message: "Admin registered successfully", user: userResponse });
-    }
   } catch (error) {
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-
 export const adminLogin = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password , universityCode} = req.body;
 
   console.log("Incoming request body:", req.body);
 
   try {
     // Check if both email and password are provided
     if (!email || !password) {
-      return res.status(403).json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
     // Retrieve the Admin user without excluding the password field
-    const user = await User.findOne({ email, role: "Admin" });
+    const user = await User.findOne({ email, role: "Admin"  , universityCode});
 
     if (!user) {
       return res.status(403).json({ message: "Admin does not exist" });
@@ -65,10 +92,10 @@ export const adminLogin = async (req, res) => {
       return res.status(403).json({ message: "Invalid Credentials" });
     }
 
-    // Generate access and refresh tokens
-    const accessToken = user.generateToken();
+    // Generate access token
+    const accessToken = user.generateToken(); // Ensure you have this method in your user model
 
-    // Set the refresh token in an HTTP-only cookie
+    // Set the refresh token in an HTTP-only cookie (if you're using refresh tokens)
     res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
     // Exclude sensitive fields before sending the response
@@ -79,7 +106,7 @@ export const adminLogin = async (req, res) => {
       message: "Login successful",
       token: accessToken,
       user: {
-        ...userResponse
+        ...userResponse,
       },
       role: "Admin",
     });
@@ -91,18 +118,19 @@ export const adminLogin = async (req, res) => {
 
 export const getPendingVerifications = async (req, res) => {
   try {
-    console.log("User incoming body req.user :" ,req.user);
-    
+    const isAdminVerified = req.user.isVerified;
+    if(!isAdminVerified){
+      return res.status(202).json({
+        message:"Admin Is Not Verified"
+      })
+    }
     // Get admin's invitation URL from authenticated admin data
-    const { invitationUrl } = req.user;
-    console.log("adminInvitationUrl : ",invitationUrl);
+    const { _id } = req.user;
+    console.log("adminInvitationUrl : ",req.user);
     
-
     // Fetch pending verification requests for the admin's invitation URL
-    const pendingRequests = await VerificationRequest.find({ invitationUrl: invitationUrl })
+    const pendingRequests = await VerificationRequest.find({ invitationUrl: _id })
       .populate('userId', 'name email empId isVerified'); // Populate user details
-      console.log(pendingRequests);
-      
 
     return res.status(200).json({ pendingRequests });
   } catch (error) {
@@ -111,7 +139,14 @@ export const getPendingVerifications = async (req, res) => {
 };
 
 export const verifyUser = async (req, res) => {
+
   try {
+    const isAdminVerified = req.user.isVerified;
+    if(!isAdminVerified){
+      return res.status(202).json({
+        message:"Admin Is Not Verified"
+      })
+    }
     const { userId } = req.body; // You may need to pass the invitation URL to delete the correct request
 
     // Find the user to verify
@@ -133,6 +168,7 @@ export const verifyUser = async (req, res) => {
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 export const rejectUser = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -157,7 +193,6 @@ export const rejectUser = async (req, res) => {
     return res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
-
 
 export const Profile = async (req, res) => {
   try {
@@ -187,10 +222,14 @@ export const adminDashboard = (req, res) => {
   return res.status(200).json({ message: "Welcome to the admin dashboard" });
 };
 
-
 export const AddSubjects = async (req, res) => {
   console.log("Incoming Request Body:", req.body); // Log request body for debugging
-  
+  const isAdminVerified = req.user.isVerified;
+    if(!isAdminVerified){
+      return res.status(202).json({
+        message:"Admin Is Not Verified"
+      })
+    }
   const { years, subjects } = req.body;
 
   // Validation example
@@ -200,7 +239,7 @@ export const AddSubjects = async (req, res) => {
 
   // Check each subject for required fields
   for (const subject of subjects) {
-    if (!subject.year || !subject.semester || !subject.subjectName || 
+    if (!subject.year || !subject.semester || !subject.subjectName || !subject.department || 
         !subject.subjectCode || !subject.subjectType || 
         (subject.subjectType === 'Theory' && (!subject.numberOfClasses || !subject.numberOfTutorials)) ||
         (subject.subjectType === 'Lab' && !subject.labHours) ||
@@ -222,9 +261,16 @@ export const AddSubjects = async (req, res) => {
   }
 };
 
-// Get subjects created by a specific admin
 export const GetSubjects = async (req, res) => {
+  console.log("req body for getting subjects: ",req.body);
+  
   try {
+    const isAdminVerified = req.user.isVerified;
+    if(!isAdminVerified){
+      return res.status(202).json({
+        message:"Admin Is Not Verified"
+      })
+    }
     // Fetch subjects based on admin ID stored in the JWT
     const subjects = await Subject.find({ adminId: req.user._id });
 
@@ -247,13 +293,25 @@ export const GetSubjects = async (req, res) => {
   }
 };
 
-
 export const UpdateSubject = async (req, res) => {
   try {
-    console.log(req.params.id , req.user.id);
-    
+    const { adminDept , isVerified } = req.user;
+    if(!isVerified){
+      return res.status(400).json({
+        message:"Admin is not verified"
+      })
+    }
+    const subjectToUpdate = await Subject.findOne({_id: req.params.id});
+    if(!subjectToUpdate){
+      return res.status(404).json({ message: 'Subject not found or not authorized' });
+    }
+    if(subjectToUpdate.department !== adminDept){
+      return res.status(400).json({
+        message:"Admin can't change other dept subjects"
+      })
+    }
     const subject = await Subject.findOneAndUpdate(
-      { _id: req.params.id, adminId: req.user.id }, // Ensure the admin can only update their subjects
+      { _id: req.params.id, department:adminDept },
       req.body,
       { new: true, runValidators: true }
     );
@@ -269,9 +327,14 @@ export const UpdateSubject = async (req, res) => {
 };
 
 export const DeleteSubject = async (req, res) => {
+
   try {
+    const {adminDept} = req.user;
+    if(!adminDept){
+      return res.status(404).json({ message: 'Subject not found or not authorized' });
+    }
     const subject = await Subject.findOneAndDelete(
-      { _id: req.params.id, adminId: req.user.id } // Ensure the admin can only delete their subjects
+      { _id : req.params.id, department : adminDept }
     );
 
     if (!subject) {
@@ -283,7 +346,6 @@ export const DeleteSubject = async (req, res) => {
     res.status(500).json({ message: 'Error deleting subject', error: error.message });
   }
 };
-
 
 export const SetCurrentRoutes = async (req, res) => {
   try {
@@ -333,5 +395,217 @@ export const SetCurrentRoutes = async (req, res) => {
       message: 'Some error occurred',
       errorObj: error
     });
+  }
+};
+
+export const getInivitationUrl = async (req, res) =>{
+  console.log("incoming body for getting url : " , req.user);
+  
+  try {
+      const { isVerified } = req.user;
+      if(!isVerified) {
+        return res.status(400).json({
+          message:"The admin is not verified yet ...."
+        })
+      }
+      const {invitationUrl} = req.user;
+      
+      if(!invitationUrl) {
+        return res.status(400).json({
+          message:"Error fertching invitation url"
+        })
+      }
+      return res.status(200).json({
+        message:"Fetched succesfully",
+        url : invitationUrl
+      })
+  } catch (error) {
+    return res.status(500).json({
+      message:"Internal Sever Error ....."
+    })
+  }
+}
+
+export const getAdminPermissions = async (req, res) => {
+  console.log(
+    "Incoming request for permissions with adminCreatedBy ID: getADMINSPERMISSIONS",
+    req.query.adminCreatedBy
+  );
+
+  try {
+    const superAdminId = req.query.adminCreatedBy;
+
+    if (!superAdminId) {
+      return res.status(400).json({
+        message: "No adminCreatedBy ID provided.",
+      });
+    }
+
+    // Correctly instantiate ObjectId with 'new'
+    const objectId = new mongoose.Types.ObjectId(superAdminId);
+
+    const permissions = await Permissions.findOne({ superAdminId: objectId });
+
+    if (!permissions) {
+      return res.status(404).json({
+        message: "Permissions not found for the provided admin ID.",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Permissions fetched successfully.",
+      permissionsList: permissions,
+    });
+  } catch (error) {
+    console.error("Error fetching permissions:", error.message);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const createSection = async (req, res) => {
+  try {
+    const {
+      sectionName,
+      semester,
+      year,
+      department,
+      courseName,
+      totalStudents
+    } = req.body;
+
+    const adminId = req.user._id; // from auth middleware
+
+    // Basic validation
+    if (!sectionName || !semester || !year || !department || !courseName) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Prevent duplicate section
+    const existing = await Section.findOne({
+      sectionName,
+      semester,
+      department
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Section already exists for this semester & department"
+      });
+    }
+
+    const section = await Section.create({
+      sectionName,
+      semester,
+      year,
+      department,
+      courseName,
+      totalStudents,
+      adminId
+    });
+
+    res.status(201).json({
+      message: "Section created successfully",
+      data: section
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+export const getSections = async (req, res) => {
+  try {
+    const { department, semester } = req.query;
+
+    const filter = {};
+
+    if (department) filter.department = department;
+    if (semester) filter.semester = Number(semester);
+
+    const sections = await Section.find(filter);
+
+    res.status(200).json({
+      message: "Sections fetched successfully",
+      data: sections
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+export const deleteSection = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const section = await Section.findByIdAndDelete(id);
+
+    if (!section) {
+      return res.status(404).json({ message: "Section not found" });
+    }
+
+    res.status(200).json({
+      message: "Section deleted successfully"
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+export const createRoom = async (req, res) => {
+  try {
+    const { roomName, roomType, department, capacity } = req.body;
+    const adminId = req.user.id;
+
+    if (!roomName || !roomType || !department) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const existing = await Room.findOne({ roomName, department });
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Room already exists in this department"
+      });
+    }
+
+    const room = await Room.create({
+      roomName,
+      roomType,
+      department,
+      capacity,
+      adminId
+    });
+
+    res.status(201).json({
+      message: "Room created",
+      data: room
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+export const getRooms = async (req, res) => {
+  try {
+    const { department, type } = req.query;
+
+    const filter = {};
+
+    if (department) filter.department = department;
+    if (type) filter.roomType = type;
+
+    const rooms = await Room.find(filter);
+
+    res.status(200).json({
+      message: "Rooms fetched",
+      data: rooms
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };

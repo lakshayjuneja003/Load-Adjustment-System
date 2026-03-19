@@ -39,3 +39,11 @@ export const isAuthenticatedSelector = selector({
     return authState.isAuthenticated;
   },
 });
+
+export const getUserdetails = selector({
+  key : "getUserdetails",
+  get: ({get}) =>{
+    const authState = get(authAtom);
+    return authState.user
+  }
+})

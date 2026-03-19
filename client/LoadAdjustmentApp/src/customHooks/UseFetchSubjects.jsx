@@ -16,8 +16,11 @@ const useFetchSubjects = () => {
     });
     
 
-      if (response.data) {
+      if (response.status === 200) {
         setSubjects(response.data.data); // handle the response data
+      }
+      else if (response.status === 202){
+        setLoading(response.data.message)
       }
     } catch (err) {
       setError(err.response ? err.response.data.message : 'Error fetching subjects');

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const subjectSchema = new mongoose.Schema({
   year: { type: Number, required: true },
   semester: { type: Number, required: true },
+  department:{type : String , required :true},
   subjectName: { type: String, required: true },
   subjectCode: { type: String, required: true },
   subjectType: { type: String, required: true, enum: ['Theory', 'Lab'] },
@@ -10,7 +11,7 @@ const subjectSchema = new mongoose.Schema({
   numberOfTutorials: { type: Number, default: 0 }, // Only for Theory
   labHours: { type: Number, default: 0 }, // Only for Lab
   creditPoints: { type: Number, required: true },
-  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true }
+  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true }
 }, { timestamps: true });
 
 const Subject = mongoose.model('Subject', subjectSchema);

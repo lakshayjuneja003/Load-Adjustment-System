@@ -1,63 +1,97 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt"
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true,
+    trim: true
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    trim: true,
+    lowercase: true,
+    trim: true
   },
   password: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: 6
   },
   role: {
     type: String,
-    enum: ['Admin', 'Staff'],
     required: true,
+    enum: ['Admin', 'Staff']  // Admin or Staff role
   },
   empId: {
     type: String,
-    required: function () {
-      return this.role === 'Staff';
-    },
-    trim: true,
+    required: true,
+    unique: true
   },
-  designation: {
+  designation: { // For Staff only
     type: String,
-    enum: ['Professor', 'Associate Professor', 'Assistant Professor'],
+    enum: ['Professor', 'Associate Professor', 'Assistant Professor'], // You can add more as needed
     required: function () {
       return this.role === 'Staff';
-    },
+    }
   },
-  teachingLoad: {
+  teachingLoad: { // Only for staff
     type: Number,
-    default: 0, // Set to 0 by default, will be updated based on designation
+    default:0
   },
-  isVerified: {
+  isVerified: { // For both admin and staff
     type: Boolean,
-    default: false,
+    default: false
   },
-  createdBy: {
+  staffCreatedBy: { // For Staff only, admin who created them
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: function () {
       return this.role === 'Staff';
-    },
+    }
   },
-  invitationUrl: {
+  adminCreatedBy: { // For Admins only, super admin who created them
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'SuperAdmin',
+    required: function () {
+      return this.role === 'Admin';
+    }
+  },
+  universityCode: {
     type: String,
-    unique: true,
-    sparse: true, // Make it optional
+    required: true
   },
+  invitationUrl:{
+    type: String,
+    default:undefined
+  },
+  adminDept: { // For Admin only
+    type: String,
+    required: function () {
+      return this.role === 'Admin';
+    }
+  },
+  crossDeptAccess: { // For staff, if they have access to multiple departments
+    type: [String],  // Array of department names staff can access
+    required: function () {
+      return this.role === 'Staff';
+    },
+    default: []  // Default to no cross-department access
+  },
+  functionalities: {
+    type: [String],  // Array to store functionalities assigned after approval
+    default: []      // Default to empty until approved
+  },
+  pendingFunctionalities: {
+    type: [String], // Array to store requested functionalities
+    default: [] // Default to no requested functionalities
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 // Set teachingLoad based on designation
@@ -78,13 +112,12 @@ userSchema.pre('save', function (next) {
         this.teachingLoad = 0;
     }
   }
-
   // Generate invitation URL for admins
-  if (this.isNew && this.role === 'Admin') {
+  if (this.role === 'Admin') {
     this.invitationUrl = `${this._id}`;
-  } else if (this.role === 'Staff') {
-    // Ensure invitationUrl is undefined for staff
-    this.invitationUrl = undefined; // This line ensures it's not set for staff users
+  }
+  else{
+    this.invitationUrl = undefined;
   }
 
   next();
