@@ -1,52 +1,129 @@
-/* Container for the URL display */
-.url-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 50px;
+/* ── Invitation URL Page ── */
+
+.url-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 760px;
 }
 
-/* Box for displaying the URL */
-.url-box {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 500px;
-    text-align: center;
-    margin-top: 20px;
-    position: relative;
-    font-family: 'Arial', sans-serif;
+/* Card top */
+.url-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
 }
 
-/* URL Text */
-.url-box p {
-    word-wrap: break-word;
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 15px;
+.url-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: rgba(59, 130, 246, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Copy Button */
-.copy-btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+.url-icon-wrap svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--accent);
 }
 
-/* Copy Button hover effect */
-.copy-btn:hover {
-    background-color: #0056b3;
+.url-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
 }
 
-/* Copied notification styling */
-.copy-btn:active {
-    background-color: #003d80;
+.url-card-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* URL row */
+.url-display-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 4px 4px 4px 16px;
+  margin-bottom: 16px;
+}
+
+.url-text {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent2);
+  word-break: break-all;
+  line-height: 1.5;
+  padding: 8px 0;
+}
+
+.url-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: var(--accent);
+}
+
+.url-copy-btn:hover {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.url-copy-btn.copied {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: var(--green);
+}
+
+.url-copy-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Hint */
+.url-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 14px;
+}
+
+.url-hint svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--muted);
+  flex-shrink: 0;
+  margin-top: 1px;
 }

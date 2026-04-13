@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { approveAdmin, getAddedDeps, getAdmins, getInvitationUrl, getPendingRequests, getPermissions, rejectAdminUser, setDepartmentDetails, setPermissionsForAdmins, SuperAdminLogin, SuperAdminProfile, SuperAdminRegister } from "../contollers/SuperAdminController.js";
+import { approveAdmin, getAddedDeps, getAdmins, getInvitationUrl, getPendingRequests, getPermissions, rejectAdminUser, setDepartmentDetails, setPermissionsForAdmins, SuperAdminLogin, SuperAdminProfile, SuperAdminRegister, updatePermissions } from "../contollers/SuperAdminController.js";
 import { verifyJWT, verifySuperAdmin } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -15,6 +15,6 @@ router.put("/departmentsdata", verifyJWT , verifySuperAdmin , setDepartmentDetai
 router.get("/getaddeddeps" , verifyJWT , verifySuperAdmin , getAddedDeps)
 router.put("/setPermissions" , verifyJWT , verifySuperAdmin , setPermissionsForAdmins)
 router.get("/getPermissions" ,verifyJWT , verifySuperAdmin ,  getPermissions)
-router.put("/updatePermissions" , )
+router.put("/updatePermissions" , verifyJWT , verifySuperAdmin , updatePermissions)
 router.get("/getinvitationurl" , verifyJWT , verifySuperAdmin , getInvitationUrl)
 export default router;

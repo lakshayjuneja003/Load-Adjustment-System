@@ -7,7 +7,6 @@ export const verifyJWT = async (req, res, next) => {
   try {
     // Get the token from cookies or the Authorization header
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-    console.log("token for authorization :  " ,token);
     
     // Check if the token is present
     if (!token) {
@@ -34,7 +33,6 @@ export const verifyJWT = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error("JWT Verification Error:", error);
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

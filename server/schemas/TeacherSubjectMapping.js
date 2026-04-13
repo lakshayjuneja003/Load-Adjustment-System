@@ -20,7 +20,7 @@ const teacherSubjectSchema = new mongoose.Schema({
 
   priority: {
     type: Number,
-    default: 1 // lower = more preferred
+    default: 1 // higer = more preferred, lower = less preferred
   }
 
 }, { timestamps: true });

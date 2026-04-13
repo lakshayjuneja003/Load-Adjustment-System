@@ -20,12 +20,14 @@ import StaffProfile from "../components/Staff/StaffProfile";
 import DepartmentForm from "../components/SuperAdmin/SetDepartmentForm";
 import SetPermissions from "../components/SuperAdmin/SetPermissions";
 import SuperAdminProfile from "../components/SuperAdmin/SuperAdminProfile";
+import NotFound from "../pages/notFound";
+import LandingPage from "../pages/LandingPage";
 
 
 const AppRoutes = () => {
   return (
     <Routes>
-
+      <Route path="/" element={<LandingPage />} />
       {/* Super Admin Routes */}
       <Route path="/superAdmin">
 
@@ -41,7 +43,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route
-          path="getinvitatiourl" // Add the route for the AddSubjects component
+          path="getinvitationurl" // Add the route for the AddSubjects component
           element={
             <ProtectedRoute role="SuperAdmin">
               <GetUrl role={"superAdmin"}/>
@@ -127,15 +129,15 @@ const AppRoutes = () => {
       </Route>
 
       {/* Staff Routes */}
-      <Route path="/staff">
+      <Route path="/Staff">
         <Route path="signup" element={<Signup role="Staff" />} />
         <Route path="login" element={<Login role="Staff" />} />
         <Route
           path="dashboard"
           element={
-            <ProtectedRoute role="Staff">
-              <StaffDashboard />
-            </ProtectedRoute>
+             <ProtectedRoute role="Staff">
+               <StaffDashboard />
+             </ProtectedRoute> 
           }
         />
 
@@ -162,6 +164,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

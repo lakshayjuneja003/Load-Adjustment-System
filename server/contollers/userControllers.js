@@ -5,7 +5,6 @@ import { User } from "../schemas/userSchema.js";
 import { VerificationRequest } from "../schemas/Verificationrequests.js";
 
 export const userRegister = async (req, res) => {
-  console.log("Req body for user : ", req.body);
   
   try {
     const { email, name, password, empId, designation, invitationUrl , universityCode } = req.body;
@@ -14,7 +13,7 @@ export const userRegister = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
     // Check if the admin exists with the given invitation URL
-    const adminUser = await User.findOne({ _id: invitationUrl , universityCode});
+    const adminUser = await User.findOne({ _id: invitationUrl , universityCode}).select('-password -refreshToken');;
     if (!adminUser) {
       return res.status(402).json({ message: "Invalid or expired invitation URL" });
     }
@@ -32,7 +31,7 @@ export const userRegister = async (req, res) => {
       name,
       password,
       staffCreatedBy: adminUser._id,
-      role: "Staff",
+      role:"Staff",
       designation,
       invitationUrl,
       universityCode
@@ -49,7 +48,7 @@ export const userRegister = async (req, res) => {
     // Check if verification request was successfully created
     if (!verificationRequest) {
       return res.status(404).json({
-        message: "Error while creating verification request",
+        message: "Error while creating user try again after some time ",
       });
     }
     return res.status(201).json({ message: "Staff registered successfully", user: newUser });
@@ -67,7 +66,7 @@ export const userLogin = async (req, res) => {
     }
 
     // Retrieve the Admin user without excluding the password field
-    const user = await User.findOne({ email, role: "Staff" , universityCode });
+    const user = await User.findOne({ email, role: "Staff" , universityCode })
     if (!user) {
       return res.status(403).json({ message: "Staff does not exist" });
     }
@@ -83,16 +82,13 @@ export const userLogin = async (req, res) => {
 
     // Set the refresh token in an HTTP-only cookie
     res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-    // Exclude sensitive fields before sending the response
     const { password: __, ...userResponse } = user.toObject();
-
     // Return the response including empId and designation if needed
     return res.status(200).json({
       message: "Login successful",
       token: accessToken,
       user: {
-        ...userResponse
+        ...userResponse,
       },
       role: "Staff",
     });
@@ -127,14 +123,28 @@ export const UserProfile = async (req, res) => {
 };
 
 export const userDashboard = (req, res) => {
-  return res.status(200).json({ message: "Welcome to the staff dashboard" });
+  try {
+    const {isVerified} = req.user;
+    if (!isVerified) {
+      return res.status(403).json({
+        message: "User is not verified yet. Please wait for admin approval.",
+      });
+    }
+    return res.status(200).json({
+      message: "Welcome to the user dashboard!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error while fetching dashboard",
+      error: error.message,
+    });
+  }
 };
 
 export const isUserVerified = async (req, res, next) => {
-  console.log(req.user);
   
   try {
-    const { userId } = req.body;
+    const userId  = req.user.id;
     const userExists = await User.findOne({ _id: userId, role: "Staff" }); // Check for _id instead of userId
 
     if (!userExists) {
@@ -218,10 +228,61 @@ export const putVerificationRequest = async (req, res, next) => {
   }
 };
 
+export const getActiveSemesters = async (req, res) => {
+  try {
+    const {staffCreatedBy , isVerified} = req.user;
+    if (!isVerified) {
+      return res.status(403).json({
+        message: "User is not verified yet. Please wait for admin approval.",
+      });
+    }
+    if(!staffCreatedBy) {
+      return res.status(400).json({
+        message: "Invalid user data. 'createdBy' field is missing.",
+      });
+    }
+
+    const semesterConfig = await SemesterConfig.findOne({ adminId: staffCreatedBy });
+    
+    if (!semesterConfig) {
+      return res.status(404).json({
+        message: 'Semester configuration not found. Please contact the admin to set up semesters.',
+      });
+    }
+    const { activeSemesters } = semesterConfig;
+
+    if (activeSemesters.length === 0) {
+      return res.status(404).json({
+        message: 'No active semesters found. Please contact the admin to activate semesters.',
+      });
+    }
+    return res.status(200).json({
+      message: 'Active semesters fetched successfully.',
+      data: activeSemesters,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occurred while retrieving active semesters.",
+      error: error.message,
+    });
+  }
+};
+
 export const getActiveSemestersWithSubjects = async (req, res) => {
   try {
-    // Fetch the current semester configuration set by the admin who created the staff user
-    const semesterConfig = await SemesterConfig.findOne({ adminId: req.user.createdBy });
+    const {staffCreatedBy , isVerified} = req.user;
+    if (!isVerified) {
+      return res.status(403).json({
+        message: "User is not verified yet. Please wait for admin approval.",
+      });
+    }
+    if(!staffCreatedBy) {
+      return res.status(400).json({
+        message: "Invalid user data. 'createdBy' field is missing.",
+      });
+    }
+
+    const semesterConfig = await SemesterConfig.findOne({ adminId: staffCreatedBy });
 
     if (!semesterConfig) {
       return res.status(404).json({
@@ -242,6 +303,7 @@ export const getActiveSemestersWithSubjects = async (req, res) => {
     // Fetch subjects that belong to the active semesters
     const subjects = await Subject.find({
       semester: { $in: activeSemesters },
+      adminId: staffCreatedBy
     }).lean();
 
     // Organize subjects under their respective semesters and track missing subjects
@@ -269,12 +331,21 @@ export const getActiveSemestersWithSubjects = async (req, res) => {
 
 export const assignTeacherToSubject = async (req, res) => {
   try {
+    // const {isVerified} = req.user;
+    // if (!isVerified) {
+    //   return res.status(403).json({
+    //     message: "User is not verified yet. Please wait for admin approval.",
+    //   });
+    // }
+
     const { teacherId, subjectId, department, priority } = req.body;
 
-    if (!teacherId || !subjectId || !department) {
+    if (!teacherId || !subjectId || !department ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
+    if (priority && (priority < 1 || priority > 5)) {
+      return res.status(400).json({ message: "Priority must be between 1 and 5" });
+    }
     // prevent duplicate mapping
     const existing = await TeacherSubject.findOne({
       teacherId,
@@ -307,7 +378,9 @@ export const assignTeacherToSubject = async (req, res) => {
 export const getTeachersForSubject = async (req, res) => {
   try {
     const { subjectId } = req.body;
-
+    if (!subjectId) {
+      return res.status(400).json({ message: "Missing subjectId in request body" });
+    }
     const mappings = await TeacherSubject.find({ subjectId })
     console.log("data fetched techers : " , mappings)
     return res.status(200).json({
@@ -319,3 +392,57 @@ export const getTeachersForSubject = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+export const getAllSubjects = async (req, res) => {
+  try {
+    const {isVerified , staffCreatedBy} = req.user;
+    if (!isVerified) {
+      return res.status(403).json({
+        message: "User is not verified yet. Please wait for admin approval.",
+      });
+    }
+    if(!staffCreatedBy) {
+      return res.status(400).json({
+        message: "Invalid user data. 'createdBy' field is missing.",
+      });
+    } 
+    const subjects = await Subject.find({ adminId: staffCreatedBy });
+
+    if (subjects.length === 0) {
+      return res.status(404).json({
+        message: "No subjects found. Please contact the admin to add subjects.",
+      });
+    }
+    return res.status(200).json({
+      message: "Subjects fetched successfully",
+      data: subjects
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
+export const getSubjectsForTeacher = async (req, res) => {
+  try {
+    const { isVerified } = req.user;
+    if (!isVerified) {
+      return res.status(403).json({
+        message: "User is not verified yet. Please wait for admin approval.",
+      });
+    }
+    const techerId = req.user._id;
+    const mappings = await TeacherSubject.find({ teacherId: techerId }).populate('subjectId');
+    const subjects = mappings.map(mapping => mapping.subjectId);
+    if (subjects.length === 0) {
+      return res.status(404).json({
+        message: "No subjects found for this teacher.",
+      });
+    }
+    return res.status(200).json({
+      message: "Subjects fetched for teacher",
+      data: subjects
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}

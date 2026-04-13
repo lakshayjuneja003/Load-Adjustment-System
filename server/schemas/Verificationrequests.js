@@ -16,5 +16,5 @@ const verificationRequestSchema = new mongoose.Schema({
     }
   });
   
-  export const VerificationRequest = mongoose.model('VerificationRequest', verificationRequestSchema);
+export const VerificationRequest = mongoose.model('VerificationRequest', verificationRequestSchema);
   

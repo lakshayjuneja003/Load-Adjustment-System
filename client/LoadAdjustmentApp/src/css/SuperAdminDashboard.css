@@ -1,0 +1,494 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #080c10;
+  --surface: #0e1318;
+  --surface2: #141a22;
+  --border: #1e2830;
+  --text: #e8edf2;
+  --muted: #5a6a7a;
+  --accent: #3b82f6;
+  --accent2: #06b6d4;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+}
+
+/* ── Top Navbar ── */
+.sf-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.sf-topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.sf-topnav-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sf-topnav-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+}
+
+.sf-topnav-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sf-topnav-pill {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.sf-topnav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+}
+
+.sf-topnav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.sf-topnav-link:hover,
+.sf-topnav-link.active {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.sf-topnav-link svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.sf-topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sf-topnav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.sf-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sf-logout-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.sf-logout-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ── Dashboard Layout ── */
+.sf-dashboard {
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text);
+}
+
+.sf-dashboard-main {
+  padding: 32px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Welcome Row ── */
+.sf-welcome-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.sf-welcome-h {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.sf-welcome-h span {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sf-welcome-sub {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sf-online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+.sf-date-badge {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+/* ── Stat Cards ── */
+.sf-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.sf-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.sf-stat-card:hover { border-color: rgba(59, 130, 246, 0.3); }
+
+.sf-stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.sf-stat-card.blue::after  { background: var(--accent); }
+.sf-stat-card.cyan::after  { background: var(--accent2); }
+.sf-stat-card.green::after { background: var(--green); }
+.sf-stat-card.amber::after { background: var(--amber); }
+
+.sf-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.sf-stat-icon.blue   { background: rgba(59, 130, 246, 0.12); }
+.sf-stat-icon.cyan   { background: rgba(6, 182, 212, 0.12); }
+.sf-stat-icon.green  { background: rgba(16, 185, 129, 0.12); }
+.sf-stat-icon.amber  { background: rgba(245, 158, 11, 0.12); }
+
+.sf-stat-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+  fill: none;
+}
+
+.sf-stat-icon.blue svg  { stroke: var(--accent); }
+.sf-stat-icon.cyan svg  { stroke: var(--accent2); }
+.sf-stat-icon.green svg { stroke: var(--green); }
+.sf-stat-icon.amber svg { stroke: var(--amber); }
+
+.sf-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sf-stat-val {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sf-stat-val.blue  { color: var(--accent); }
+.sf-stat-val.cyan  { color: var(--accent2); }
+.sf-stat-val.green { color: var(--green); }
+.sf-stat-val.amber { color: var(--amber); }
+
+/* ── Section Header ── */
+.sf-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sf-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+.sf-section-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sf-section-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  white-space: nowrap;
+}
+
+.sf-section-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.sf-section-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ── Error / Loading ── */
+.sf-error-box {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 14px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.sf-loading {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 20px 0;
+}
+
+/* ── Admins Grid ── */
+.sf-admins-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.sf-admin-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+
+.sf-admin-card:hover { border-color: rgba(59, 130, 246, 0.25); }
+
+.sf-admin-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sf-admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Cycle avatar colors by index — apply via JS className */
+.sf-admin-avatar.c0 { background: rgba(59, 130, 246, 0.15); color: var(--accent); }
+.sf-admin-avatar.c1 { background: rgba(6, 182, 212, 0.15);  color: var(--accent2); }
+.sf-admin-avatar.c2 { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+.sf-admin-avatar.c3 { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.sf-admin-avatar.c4 { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+.sf-admin-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: var(--text);
+}
+
+.sf-admin-email {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sf-admin-meta {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sf-admin-dept {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sf-admin-dept svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+}
+
+.sf-v-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 99px;
+}
+
+.sf-v-badge.verified { background: rgba(16, 185, 129, 0.1); color: var(--green); }
+.sf-v-badge.pending  { background: rgba(245, 158, 11, 0.1);  color: var(--amber); }
+.sf-v-badge.rejected { background: rgba(239, 68, 68, 0.1);   color: var(--red); }
+
+.sf-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+}
+/* ── Admin / Staff TopNavBar role colours ── */
+
+/* Pill variants */
+.tnb-pill-blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.tnb-pill-purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Avatar variants */
+.tnb-avatar-blue {
+  background: rgba(59, 130, 246, 0.15) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #3b82f6 !important;
+}
+
+.tnb-avatar-purple {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: #8b5cf6 !important;
+}

@@ -1,0 +1,266 @@
+/* ── Pending Requests Page ── */
+
+.pr-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pr-count-badge {
+  font-size: 12px;
+  color: var(--amber);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+/* Toast */
+.pr-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.pr-toast svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.pr-toast.success {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: var(--green);
+}
+
+.pr-toast.error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--red);
+}
+
+/* Request cards list */
+.pr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pr-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.pr-card:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.pr-card-inner {
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Left side */
+.pr-user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pr-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pr-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.pr-email {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pr-meta {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 18px;
+}
+
+.pr-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pr-meta-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pr-meta-val {
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+}
+
+/* Functionalities */
+.pr-func-section {}
+
+.pr-func-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pr-editing-pill {
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 2px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+}
+
+.pr-func-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pr-func-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.pr-func-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  width: 120px;
+}
+
+.pr-func-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  transition: color 0.2s;
+  line-height: 0;
+}
+
+.pr-func-delete:hover { color: var(--red); }
+
+.pr-func-delete svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Action buttons */
+.pr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.pr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.pr-btn svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.pr-btn.accept {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: var(--green);
+}
+.pr-btn.accept:hover { background: rgba(16, 185, 129, 0.18); }
+
+.pr-btn.reject {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--red);
+}
+.pr-btn.reject:hover { background: rgba(239, 68, 68, 0.15); }
+
+.pr-btn.edit {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--muted);
+}
+.pr-btn.edit:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.pr-btn.save {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: var(--accent);
+}
+.pr-btn.save:hover { background: rgba(59, 130, 246, 0.18); }

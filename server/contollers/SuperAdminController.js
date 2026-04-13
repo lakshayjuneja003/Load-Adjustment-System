@@ -243,7 +243,7 @@ export const setDepartmentDetails = async (req, res) => {
   try {
     const { departmentName, courses } = req.body;
 
-    // Ensure courses array exists and has content
+    // Ensure courses array exists and has contenth
     if (!courses || !Array.isArray(courses) || courses.length === 0) {
       return res.status(400).json({ message: 'Courses are required.' });
     }
@@ -326,7 +326,6 @@ export const getAddedDeps = async (req, res) => {
 
 export const setPermissionsForAdmins = async (req, res) => {
   try {
-      console.log("Request body:", req.body);  // Debugging
 
       const { permissions } = req.body;
       if (!permissions || permissions.length <= 0) {
@@ -378,8 +377,37 @@ export const getPermissions = async (req, res)=>{
 }
 
 export const updatePermissions = async (req, res)=>{
+
   try {
-      
+
+    const SuperAdminid  = req.user._id;
+
+      const { newPermissions } = req.body;
+     
+      if ( !SuperAdminid || !newPermissions.length != 0) {
+          return res.status(400).json({
+              message: "new permissions are required."
+          });
+      }
+
+
+      const updatedPermissions = await Permissions.findOneAndUpdate(
+        { 
+          superAdminId: SuperAdminid 
+        },
+        { 
+          permissions: newPermissions 
+        },
+        { 
+          new: true, upsert: true 
+        } // create if not exists
+    );
+
+      return res.status(200).json({
+        message:"Permissions updated succesfully",
+        permissions: updatedPermissions
+      })
+
   } catch (error) {
     return res.status(500).json({
       message:"Internal Server Error ..."
