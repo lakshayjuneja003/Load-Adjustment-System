@@ -175,7 +175,7 @@
 /* ── Welcome Row ── */
 .sf-welcome-row {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   margin-bottom: 28px;
 }

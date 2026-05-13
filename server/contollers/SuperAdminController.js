@@ -103,33 +103,85 @@ export const SuperAdminLogin = async (req, res, next) => {
     }
 };
 
-export const SuperAdminProfile = async (req , res, next)=>{
-    try {
-      const { email , universityCode } = req.user;
-      if(!email || !universityCode){
-          return res.status(400).json({
-            message:"Invalid creditialds"
-          })
-      }
-      const userAdmin = await SuperAdmin.findOne({email , role:"SuperAdmin" , universityCode});
-      if(!userAdmin){
-        return res.status(400).json({
-          message:"No user found"
-        })
-      }
-      const { password: __, ...adminResponse } = userAdmin.toObject()
-      return res.status(200).json({
-        message:"User fetched succesfully",
-        user: {
-          ...adminResponse
-        }
-      })
-    } catch (error) {
-      return res.status(500).json({
-        message:"internal server error"
-      })
+export const SuperAdminProfile = async (req, res, next) => {
+  try {
+    const { email, universityCode } = req.user;
+
+    if (!email || !universityCode) {
+      return res.status(400).json({
+        message: "Invalid credentials"
+      });
     }
-}
+
+    const userAdmin = await SuperAdmin.findOne({
+      email,
+      role: "SuperAdmin",
+      universityCode
+    });
+
+    if (!userAdmin) {
+      return res.status(400).json({
+        message: "No user found"
+      });
+    }
+
+    // 🔥 Parallel queries (important optimization)
+    const [
+      totalAdmins,
+      totalStaff,
+      verifiedAdmins,
+      pendingRequests
+    ] = await Promise.all([
+
+      // total admins
+      User.countDocuments({
+        role: "Admin",
+        universityCode
+      }),
+
+      // total staff
+      User.countDocuments({
+        role: "Staff",
+        universityCode
+      }),
+
+      // verified admins
+      User.countDocuments({
+        role: "Admin",
+        universityCode,
+        isVerified: true
+      }),
+
+      // pending requests (admins + staff)
+      User.countDocuments({
+        universityCode,
+        role: "Admin",
+        isVerified: false
+      })
+
+    ]);
+
+    const { password: __, ...adminResponse } = userAdmin.toObject();
+
+    return res.status(200).json({
+      message: "User fetched successfully",
+      user: {
+        ...adminResponse,
+        stats: {
+        totalAdmins,
+        totalStaff,
+        verifiedAdmins,
+        pendingRequests
+      }
+      }
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
   
 export const getPendingRequests = async (req, res, next) =>{
   try {
@@ -222,7 +274,7 @@ export const getAdmins = async (req , res, next) =>{
         message:"Invitation url not found"
       })
     }
-    const admins = await User.find({adminCreatedBy : invitationUrl ,universityCode , role: "Admin"})
+    const admins = await User.find({adminCreatedBy : invitationUrl ,universityCode , role: "Admin" , isVerified: true}).select("-password");
     if(!admins){
       return res.status(400).json({
         message:"No admin found"

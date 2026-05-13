@@ -1,5 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../../css/SuperAdmin.css';
+import { useRecoilState } from 'recoil';
+import { authAtom } from '../../store/authStore/authAtom';
+
 
 const ADMIN_LINKS = [
   {
@@ -36,7 +39,7 @@ const ADMIN_LINKS = [
   },
   {
     to: '/admin/profile',
-    label: 'Profile',
+    label: 'Admin Profile',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -85,7 +88,7 @@ const STAFF_LINKS = [
   },
   {
     to: '/staff/profile',
-    label: 'Profile',
+    label: 'User Profile',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -96,6 +99,12 @@ const STAFF_LINKS = [
 ];
 
 const TopNavBar = ({ role, handleLogout, userName }) => {
+
+  
+  const authState = useRecoilState(authAtom);
+  if(role === undefined || role !== authState[0]?.user?.role){
+    role = authState[0]?.user?.role || 'Staff';
+  }
   const { pathname } = useLocation();
   const navigate     = useNavigate();
 
@@ -106,7 +115,7 @@ const TopNavBar = ({ role, handleLogout, userName }) => {
   const initials = userName
     ? userName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
     : role === 'Admin' ? 'AD' : 'ST';
-
+  console.log("ROLE:", role, "PATH:", pathname);
   const onLogout = () => {
     if (handleLogout) {
       handleLogout();

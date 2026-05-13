@@ -88,7 +88,7 @@ const SuperAdminDashboard = () => {
           <StatCard
             color="blue"
             label="Total Admins"
-            value={userDetails?.totalAdmins}
+            value={userDetails?.stats?.totalAdmins}
             icon={
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -100,7 +100,7 @@ const SuperAdminDashboard = () => {
           <StatCard
             color="cyan"
             label="Total Staff"
-            value={userDetails?.totalStaff}
+            value={userDetails?.stats?.totalStaff}
             icon={
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -111,7 +111,7 @@ const SuperAdminDashboard = () => {
           <StatCard
             color="green"
             label="Verified Admins"
-            value={userDetails?.verifiedAdmins}
+            value={userDetails?.stats?.verifiedAdmins}
             icon={
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
                 <polyline points="9 11 12 14 22 4" />
@@ -122,7 +122,7 @@ const SuperAdminDashboard = () => {
           <StatCard
             color="amber"
             label="Pending Requests"
-            value={userDetails?.pendingRequests}
+            value={userDetails?.stats?.pendingRequests}
             icon={
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
                 <circle cx="12" cy="12" r="10" />

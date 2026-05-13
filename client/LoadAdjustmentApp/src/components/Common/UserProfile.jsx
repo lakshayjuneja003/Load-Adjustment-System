@@ -1,9 +1,9 @@
 import { useRecoilValue } from 'recoil';
 import { authAtom } from '../../store/authStore/authAtom';
-import TopNavBar from './TopNav';
+import TopNavBar from '../Admin/TopNav';
 import '../../css/SuperAdminDashboard.css';
 import '../../css/Profile.css';
-import '../../css/Signup.css';
+import '../../css//Signup.css';
 import '../../css/ShowSubjects.css';
 
 const AVATAR_COLORS = [
@@ -17,13 +17,13 @@ const AVATAR_COLORS = [
 const getInitials = (name = '') =>
   name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase();
 
-const AdminProfile = () => {
+const UserProfile = () => {
   const { user } = useRecoilValue(authAtom);
 
   if (!user) {
     return (
       <div className="sf-dashboard">
-        <TopNavBar role="Admin" />
+        <TopNavBar role="Staff" />
         <div className="sf-dashboard-main">
           <div className="sf-error-box">No user data found. Please log in again.</div>
         </div>
@@ -31,17 +31,30 @@ const AdminProfile = () => {
     );
   }
 
-  const avatarStyle = AVATAR_COLORS[0];
-  const initials    = getInitials(user.name);
-  const joinedDate  = user.createdAt
+  const isAdmin      = user.role === 'Admin';
+  const avatarStyle  = AVATAR_COLORS[0];
+  const initials     = getInitials(user.name);
+  const joinedDate   = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', {
         year: 'numeric', month: 'long', day: 'numeric',
       })
     : '—';
 
+  // Build detail cards based on role — shared fields + role-specific
+  const detailCards = [
+    { label: 'Email address',  value: user.email,           style: '' },
+    { label: 'Employee ID',    value: user.empId || '—',    style: 'mono' },
+    { label: 'University code',value: user.universityCode || '—', style: 'mono' },
+    isAdmin
+      ? { label: 'Department',   value: user.adminDept || '—', style: 'mono' }
+      : { label: 'Designation',  value: user.designation || '—', style: 'mono' },
+    { label: 'Teaching load',  value: user.teachingLoad ?? 0, style: 'accent' },
+    { label: 'Joined on',      value: joinedDate,            style: '' },
+  ];
+
   return (
     <div className="sf-dashboard">
-      <TopNavBar role="Admin" userName={user.name} />
+      <TopNavBar role={user.role} userName={user.name} />
 
       <div className="sf-dashboard-main">
 
@@ -56,10 +69,24 @@ const AdminProfile = () => {
           <div className="profile-hero-info">
             <div className="profile-hero-name">{user.name}</div>
             <div className="profile-hero-role" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <span className="sa-badge signup-badge-blue" style={{ marginBottom: 0 }}>
-                <span className="sa-badge-dot dot-blue" />
+              {/* Role badge */}
+              <span
+                className="sa-badge"
+                style={{
+                  marginBottom: 0,
+                  background: isAdmin ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)',
+                  border: isAdmin ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(139,92,246,0.2)',
+                  color: isAdmin ? '#3b82f6' : '#8b5cf6',
+                }}
+              >
+                <span
+                  className="sa-badge-dot"
+                  style={{ background: isAdmin ? '#3b82f6' : '#8b5cf6' }}
+                />
                 {user.role}
               </span>
+
+              {/* Verified badge */}
               {user.isVerified && (
                 <span
                   className="sa-badge"
@@ -74,40 +101,39 @@ const AdminProfile = () => {
                   Verified
                 </span>
               )}
+
+              {/* Designation pill for staff */}
+              {!isAdmin && user.designation && (
+                <span
+                  className="sa-badge"
+                  style={{
+                    marginBottom: 0,
+                    background: 'rgba(245,158,11,0.1)',
+                    border: '1px solid rgba(245,158,11,0.2)',
+                    color: '#f59e0b',
+                  }}
+                >
+                  {user.designation}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         {/* Details grid */}
         <div className="profile-details-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-          <div className="profile-detail-card">
-            <div className="profile-detail-label">Email address</div>
-            <div className="profile-detail-val">{user.email}</div>
-          </div>
-          <div className="profile-detail-card">
-            <div className="profile-detail-label">Employee ID</div>
-            <div className="profile-detail-val mono">{user.empId || '—'}</div>
-          </div>
-          <div className="profile-detail-card">
-            <div className="profile-detail-label">University code</div>
-            <div className="profile-detail-val mono">{user.universityCode || '—'}</div>
-          </div>
-          <div className="profile-detail-card">
-            <div className="profile-detail-label">Department</div>
-            <div className="profile-detail-val mono">{user.adminDept || '—'}</div>
-          </div>
-          <div className="profile-detail-card">
-            <div className="profile-detail-label">Teaching load</div>
-            <div className="profile-detail-val accent">{user.teachingLoad ?? 0}</div>
-          </div>
-          <div className="profile-detail-card">
-            <div className="profile-detail-label">Joined on</div>
-            <div className="profile-detail-val">{joinedDate}</div>
-          </div>
+          {detailCards.map(({ label, value, style }) => (
+            <div className="profile-detail-card" key={label}>
+              <div className="profile-detail-label">{label}</div>
+              <div className={`profile-detail-val${style ? ` ${style}` : ''}`}>
+                {value}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Functionalities */}
-        {user.functionalities?.length > 0 && (
+        {/* Functionalities — admin only */}
+        {isAdmin && user.functionalities?.length > 0 && (
           <>
             <div className="profile-section-header">
               <div className="sf-section-title">Assigned functionalities</div>
@@ -128,7 +154,7 @@ const AdminProfile = () => {
           </>
         )}
 
-        {/* Cross-dept access */}
+        {/* Cross-dept access — shown for both if present */}
         {user.crossDeptAccess?.length > 0 && (
           <>
             <div className="profile-section-header">
@@ -162,4 +188,4 @@ const AdminProfile = () => {
   );
 };
 
-export default AdminProfile;
+export default UserProfile;

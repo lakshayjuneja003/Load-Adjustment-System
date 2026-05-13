@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.uc-wrapper {
+  background: #080c10;
+  color: #e8edf2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  padding: 40px 20px;
+}
+
+/* Background grid */
+.uc-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.uc-container {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Wrench icon */
+.uc-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: #0e1318;
+  border: 1px solid #1e2830;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  animation: ucFadeUp 0.6s ease 0.1s both;
+}
+
+.uc-icon-wrap svg {
+  width: 36px;
+  height: 36px;
+  stroke: #3b82f6;
+}
+
+/* Label */
+.uc-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  margin-bottom: 16px;
+  animation: ucFadeUp 0.6s ease 0.2s both;
+}
+
+/* Heading */
+.uc-heading {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(48px, 8vw, 88px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  animation: ucFadeUp 0.6s ease 0.3s both;
+  color: #e8edf2;
+}
+
+.uc-heading-accent {
+  display: block;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Description */
+.uc-desc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: #5a6a7a;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 40px;
+  animation: ucFadeUp 0.6s ease 0.4s both;
+}
+
+/* Progress */
+.uc-progress-wrap {
+  width: 320px;
+  margin-bottom: 40px;
+  animation: ucFadeUp 0.6s ease 0.5s both;
+}
+
+.uc-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #5a6a7a;
+  margin-bottom: 8px;
+}
+
+.uc-progress-bar {
+  height: 3px;
+  background: #1e2830;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.uc-progress-fill {
+  height: 100%;
+  width: 68%;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  border-radius: 99px;
+  animation: ucGrow 1.2s ease 0.8s both;
+}
+
+/* Back button */
+.uc-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid #1e2830;
+  border-radius: 10px;
+  color: #5a6a7a;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  animation: ucFadeUp 0.6s ease 0.6s both;
+}
+
+.uc-back-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.uc-back-btn svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+}
+
+.uc-back-btn:hover svg {
+  transform: translateX(-3px);
+}
+
+/* Animations */
+@keyframes ucFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ucGrow {
+  from { width: 0; }
+  to   { width: 68%; }
+}

@@ -102,7 +102,7 @@ const AdminsPendingRequests = () => {
     setEditingIndex(index);
     if (!editedFunctionalities[userId]) {
       const funcs = requests.find((r) => r.userId._id === userId)?.pendingFunctionalities || [];
-      setEditedFunctionalities((prev) => ({ ...prev, [userId]: [...funcs] }));
+      setEditedFunctionalities(( prev) => ({ ...prev, [userId]: [...funcs] }));
     }
   };
 

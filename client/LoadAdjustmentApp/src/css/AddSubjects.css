@@ -1,0 +1,113 @@
+/* ── Add Subjects Page ── */
+
+.addsubj-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.addsubj-card-header {
+  margin-bottom: 20px;
+}
+
+.addsubj-card-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.addsubj-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.addsubj-card-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Subject list inside card */
+.addsubj-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.addsubj-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.addsubj-item:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.addsubj-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.addsubj-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addsubj-item-meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+.addsubj-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.addsubj-remove-btn:hover {
+  color: var(--red);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.addsubj-remove-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Footer row */
+.addsubj-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}

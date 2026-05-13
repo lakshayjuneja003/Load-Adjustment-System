@@ -331,12 +331,12 @@ export const getActiveSemestersWithSubjects = async (req, res) => {
 
 export const assignTeacherToSubject = async (req, res) => {
   try {
-    // const {isVerified} = req.user;
-    // if (!isVerified) {
-    //   return res.status(403).json({
-    //     message: "User is not verified yet. Please wait for admin approval.",
-    //   });
-    // }
+    const {isVerified} = req.user;
+    if (!isVerified) {
+      return res.status(403).json({
+        message: "User is not verified yet. Please wait for admin approval.",
+      });
+    }
 
     const { teacherId, subjectId, department, priority } = req.body;
 

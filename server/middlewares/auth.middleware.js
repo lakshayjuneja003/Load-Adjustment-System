@@ -59,3 +59,24 @@ export const verifySuperAdmin = (req, res, next) => {
   }
   next();
 };
+
+export const verifyAdminOrStaff = (req, res, next) => {
+  if (req.user.role !== "Admin" && req.user.role !== "Staff") {
+    return res.status(403).json({ message: "Forbidden: Admins or Staff members only" });
+  }
+  next(); 
+}
+
+export const verifyAdminOrSuperAdmin = (req, res, next) => {
+  if (req.user.role !== "Admin" && req.user.role !== "SuperAdmin") {
+    return res.status(403).json({ message: "Forbidden: Admins or Super Admins only" });
+  } 
+  next();
+}
+
+export const verifyStaffOrSuperAdminOrAdmin = (req, res, next) => {
+  if (req.user.role !== "Admin" && req.user.role !== "SuperAdmin" && req.user.role !== "Staff") {
+    return res.status(403).json({ message: "Forbidden: Admins or Super Admins or Staff members only" });
+  } 
+  next(); 
+}

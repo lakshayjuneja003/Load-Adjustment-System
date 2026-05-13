@@ -24,7 +24,11 @@
   width: 15px;
   height: 15px;
 }
-
+.data-btns{
+  display: flex;
+  justify-content: space-between;
+  gap: 8px; 
+}
 /* Filter bar */
 .adm-filter-bar {
   display: flex;

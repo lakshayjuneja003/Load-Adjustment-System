@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useFetchSubjects from '../../customHooks/UseFetchSubjects';
 import ShowSubjects from './ShowSubjects';
 import TopNavBar from "./TopNav"
@@ -83,13 +83,22 @@ const AdminDashboard = () => {
               Admin Dashboard &nbsp;·&nbsp; Manage your department's subjects
             </div>
           </div>
-          <a href="/admin/add-subjects" className="adm-add-btn">
+          <div className='data-btns'>
+            <Link to="/admin/add-subjects" className="adm-add-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Add Subjects
-          </a>
+          </Link>
+          <Link to="/admin/setDepartmentInfraData" className="adm-add-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Sections & Rooms
+          </Link>
+          </div>
         </div>
 
         {/* Semester filter */}

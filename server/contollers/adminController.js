@@ -8,6 +8,8 @@ import Permissions from "../schemas/PermissionsSchema.js"
 import mongoose from 'mongoose';
 import { Section } from "../schemas/SectionsSchema.js";
 import { Room } from "../schemas/RoomSchema.js";
+import { TeacherSubject } from "../schemas/TeacherSubjectMapping.js";
+import { generateTasks } from "../constants.js";
 
 export const adminRegister = async (req, res) => {
   try {
@@ -389,7 +391,18 @@ export const DeleteSubject = async (req, res) => {
     if (!subject) {
       return res.status(404).json({ message: 'Subject not found or not authorized' });
     }
+    // find proiority of the subject to be deleted and delete the teacher subject mapping if exists
+    const findprioity = await TeacherSubject.findOne({ subjectId  });
+    // to handle the deletion of subject which is assigned to teacher and if assigned then delete the mapping of that subject with teacher in teacher subject mapping collection
+    let deletionResult = null;
 
+    if(findprioity){
+     deletionResult = await TeacherSubject.deleteMany({ subjectId }); 
+    }
+
+    if(findprioity && deletionResult.deletedCount === 0){
+      return res.status(404).json({ message: 'Subject deleted but failed to delete associated teacher-subject mapping.' });
+    }
     return res.status(200).json({ message: 'Subject deleted successfully' });
 
   } catch (error) {
@@ -499,30 +512,35 @@ export const updateCurrentSems = async (req , res)=>{
 
 export const getCurrentSems = async (req, res) => {
   try {
-    const adminId = req.user._id;
+    let adminId = null;
+    if(req.user.role === "Staff"){
+        adminId = req.user.staffCreatedBy;
+    }
+    else if(req.user.role === "Admin"){
+        adminId = req.user._id;
+    }
     if(!adminId){
       return res.status(400).json({
         message:"Admin ID is missing"
       })
     }
     const semsterConfig = await SemesterConfig.findOne({ adminId });
-
     if (!semsterConfig) {
       return res.status(404).json({
         message: 'Semester configuration not found for this admin.'
       });
     }
-
     return res.status(200).json({
       message: 'Semester configuration fetched successfully',
       data: semsterConfig
     });
   } catch (error) {
-    return res.status(400).json({ 
+    return res.status(500).json({ 
       message: 'Some error occurred'
     })
   }
 }
+
 export const getInivitationUrl = async (req, res) =>{
   console.log("incoming body for getting url : " , req.user);
   
@@ -661,6 +679,45 @@ export const getSections = async (req, res) => {
   }
 };
 
+export const updateSection = async (req, res) => {
+  try {
+    const sectionId = req.params.id;
+    const { sectionName, semester, year, department, courseName, totalStudents } = req.body;
+    console.log("Incoming request to update section with data:", req.body);
+    const adminId = req.user._id;
+    if (!adminId) {
+      return res.status(400).json({ message: "Admin ID is missing" });
+    }
+    if (!sectionId) {
+      return res.status(400).json({ message: "Section ID is required" });
+    }
+    if (!sectionName || !semester || !year || !department || !courseName || totalStudents === undefined) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const section = await Section.findByIdAndUpdate(sectionId , {
+      sectionName,
+      semester,
+      year,
+      department,
+      courseName,
+      totalStudents: totalStudents ? totalStudents : 0,
+      adminId
+    });
+    if (!section) {
+      return res.status(404).json({ message: "Section not found" });
+    }
+
+    res.status(200).json({
+      message: "Section updated successfully",
+      data: section
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
 export const deleteSection = async (req, res) => {
   try {
     const id = req.params.id;
@@ -715,6 +772,63 @@ export const createRoom = async (req, res) => {
   }
 };
 
+export const updateRoom = async (req, res) => {
+  try {
+    const roomId = req.params.id;
+    const { roomNumber, roomType, department, capacity } = req.body;
+    const adminId = req.user.id;
+
+    if (!adminId) {
+      return res.status(400).json({ message: "Admin ID is missing" });
+    }
+    if (!roomId) {
+      return res.status(400).json({ message: "Room ID is required" });
+    }
+    if (!roomNumber || !roomType || !department || capacity === undefined) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+    
+    const room = await Room.findByIdAndUpdate(roomId, {
+      roomName: roomNumber,
+      roomType,
+      department,
+      capacity: capacity ? capacity : 0,
+      adminId
+    });
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    } 
+
+    res.status(200).json({
+      message: "Room updated successfully",
+      data: room
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
+export const deleteRoom = async (req, res) => {
+  try {
+    const roomId = req.params.id;
+    
+    if (!roomId) {
+      return res.status(400).json({ message: "Room ID is required" });
+    }
+    const room = await Room.findByIdAndDelete(roomId);
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.status(200).json({
+      message: "Room deleted successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
 export const getRooms = async (req, res) => {
   try {
     const { department, type } = req.query;
@@ -735,3 +849,56 @@ export const getRooms = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+export const createTasks = async (req, res) => {
+  try {
+    // get adminID
+    const adminId = req.user._id;
+    if(!adminId){
+      return res.status(400).json({
+        message:"Admin ID is missing"
+      })
+    }
+    // Fetch Sections and Subjects for the admin to create tasks
+    const semesterConfig = await SemesterConfig.findOne({ adminId });
+    
+    if(!semesterConfig){
+      return res.status(404).json({
+        message:"Semester configuration not found for this admin."
+      })
+    }
+    const { activeSemesters } = semesterConfig;
+
+    const sections = await Section.find({
+      semester: { $in: activeSemesters },
+      adminId
+    })
+    const subjects = await Subject.find({
+      semester: { $in: activeSemesters },
+      adminId
+    })
+    // validation to check if sections and subjects exist for the admin before creating tasks
+    if(sections.length === 0){
+      return res.status(404).json({
+        message:"No sections found for this admin"
+      })
+    }
+    if(subjects.length === 0){
+      return res.status(404).json({
+        message:"No subjects found for this admin"
+      })
+    }
+    const tasks = await generateTasks(subjects, sections);
+    if(tasks.length === 0){
+      return res.status(404).json({
+        message:"No tasks generated for the given sections and subjects"
+      })
+    }
+    return res.status(200).json({
+      message:"Sections and Subjects fetched successfully",
+      tasks
+    })
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
